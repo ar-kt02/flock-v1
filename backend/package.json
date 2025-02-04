@@ -14,22 +14,39 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@fastify/oauth2": "^8.1.1",
     "@fastify/type-provider-typebox": "^5.1.0",
     "@prisma/client": "^6.3.0",
-    "fastify": "^5.2.1"
+    "dotenv": "^16.4.7",
+    "fastify": "^5.2.1",
+    "fastify-plugin": "^5.0.1",
+    "zod": "^3.24.1"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
+    "@types/jest": "^29.5.14",
     "@types/node": "^20.11.0",
+    "@types/passport": "^1.0.17",
+    "@types/passport-google-oauth20": "^2.0.16",
     "bcrypt": "^5.1.1",
     "eslint": "^9.19.0",
     "husky": "^9.1.7",
     "jest": "^29.7.0",
     "lint-staged": "^15.4.3",
+    "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0",
     "prettier": "^3.4.2",
     "prisma": "^6.3.0",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.7.3"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": "eslint --fix"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
   },
   "repository": {
     "type": "git",
