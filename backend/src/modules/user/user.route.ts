@@ -1,28 +1,20 @@
 import { FastifyInstance } from "fastify";
 import { Type } from "@fastify/type-provider-typebox";
 import { comparePassword, createUser, findUserByEmail } from "./user.service";
+import {
+   RegisterBodySchema,
+   RegisterResponseSchema,
+} from "./schemas/register.schema";
+import { LoginBodySchema, LoginResponseSchema } from "./schemas/login.schema";
+import { ProtectedResponseSchema } from "./schemas/protected.schema";
 
 async function userRoutes(fastify: FastifyInstance) {
    fastify.post(
       "/register",
       {
          schema: {
-            body: Type.Object({
-               email: Type.String({ format: "email" }),
-               password: Type.String({ minLength: 8 }),
-            }),
-            response: {
-               201: Type.Object({
-                  id: Type.String(),
-                  email: Type.String({ format: "email" }),
-               }),
-               400: Type.Object({
-                  message: Type.String(),
-               }),
-               500: Type.Object({
-                  message: Type.String(),
-               }),
-            },
+            body: RegisterBodySchema,
+            response: RegisterResponseSchema,
          },
       },
       async (request, reply) => {
@@ -56,15 +48,8 @@ async function userRoutes(fastify: FastifyInstance) {
       "/login",
       {
          schema: {
-            body: Type.Object({
-               email: Type.String({ format: "email" }),
-               password: Type.String(),
-            }),
-            response: {
-               200: Type.Object({ token: Type.String() }),
-               401: Type.Object({ message: Type.String() }),
-               500: Type.Object({ message: Type.String() }),
-            },
+            body: LoginBodySchema,
+            response: LoginResponseSchema,
          },
       },
       async (request, reply) => {
@@ -96,7 +81,6 @@ async function userRoutes(fastify: FastifyInstance) {
             const token = fastify.jwt.sign({ id: user.id, email: user.email });
             return reply.status(200).send({ token });
          } catch (error) {
-            console.log("login route", error);
             return reply.status(500).send({ message: "Failed to login." });
          }
       }
@@ -106,14 +90,12 @@ async function userRoutes(fastify: FastifyInstance) {
       "/protected",
       {
          schema: {
-            response: {
-               200: Type.Object({ message: Type.String() }),
-            },
+            response: ProtectedResponseSchema,
          },
          onRequest: [fastify.authenticate],
       },
       async (request, reply) => {
-         return { message: "Successfully accessed protetced route." };
+         return { message: "Successfully accessed protected route." };
       }
    );
 }

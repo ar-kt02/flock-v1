@@ -175,11 +175,11 @@ describe("User Model", () => {
          expect(protectedResponse.statusCode).toBe(200);
          const protecedPayload = JSON.parse(protectedResponse.payload);
          expect(protecedPayload.message).toBe(
-            "Successfully accessed protetced route."
+            "Successfully accessed protected route."
          );
       });
 
-      it("should return 401 for protected route without valid JWT token", async () => {
+      it("should return 401 when accessing protected route without valid JWT token", async () => {
          const protectedResponse = await fastify.inject({
             method: "GET",
             url: "/api/users/protected",
