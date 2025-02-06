@@ -2,6 +2,11 @@ import Fastify from "fastify";
 import { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 import userRoutes from "./modules/user/user.route";
 import jwtPlugin from "./plugins/jwt";
+import dotenv from "dotenv";
+
+const envFile = `.env.${process.env.NODE_ENV || "development"}`;
+
+dotenv.config({ path: envFile });
 
 const fastify = Fastify({
    logger: true,

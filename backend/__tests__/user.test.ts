@@ -13,7 +13,12 @@ const fastify = Fastify({
 
 function runPrismaMigrateDev() {
    try {
-      execSync("npx prisma migrate dev", { stdio: "inherit" });
+      execSync("npx prisma migrate dev", {
+         stdio: "inherit",
+         env: {
+            ...process.env,
+         },
+      });
    } catch (error) {
       process.exit(1);
    }
