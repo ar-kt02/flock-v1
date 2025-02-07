@@ -12,14 +12,14 @@ declare module "fastify" {
 }
 
 export default fp(async (fastify: FastifyInstance) => {
-   const verySecret = process.env.JWT_SECRET;
+   const secret = process.env.JWT_SECRET;
 
-   if (!verySecret) {
+   if (!secret) {
       process.exit(1);
    }
 
    fastify.register(jwt, {
-      secret: verySecret,
+      secret: secret,
    });
 
    fastify.decorate("authenticate", async (request: any, reply: any) => {
