@@ -1,12 +1,15 @@
 import { FastifyInstance } from "fastify";
-import { Type } from "@fastify/type-provider-typebox";
 import { comparePassword, createUser, findUserByEmail } from "./user.service";
 import {
    RegisterBodySchema,
    RegisterResponseSchema,
+   CreateAdminBodySchema,
 } from "./schemas/register.schema";
 import { LoginBodySchema, LoginResponseSchema } from "./schemas/login.schema";
 import { ProtectedResponseSchema } from "./schemas/protected.schema";
+import { UserRole } from "@prisma/client";
+import { Type } from "@fastify/type-provider-typebox";
+import { isAdmin } from "../../utils/auth";
 
 async function userRoutes(fastify: FastifyInstance) {
    fastify.post(
@@ -18,9 +21,10 @@ async function userRoutes(fastify: FastifyInstance) {
          },
       },
       async (request, reply) => {
-         const { email, password } = request.body as {
+         const { email, password, role } = request.body as {
             email: string;
             password: string;
+            role: UserRole;
          };
          try {
             const existingUser = await findUserByEmail(email);
@@ -30,7 +34,7 @@ async function userRoutes(fastify: FastifyInstance) {
                   .send({ message: "Email is already taken." });
             }
 
-            const user = await createUser(email, password);
+            const user = await createUser(email, password, role);
 
             return reply.status(201).send({
                id: user.id,
@@ -67,21 +71,57 @@ async function userRoutes(fastify: FastifyInstance) {
                   .send({ message: "Invalid credentials." });
             }
 
-            const validatePassword = await comparePassword(
+            const passwordIsValid = await comparePassword(
                password,
                user.password
             );
 
-            if (!validatePassword) {
+            if (!passwordIsValid) {
                return reply
                   .status(401)
                   .send({ message: "Invalid credentials." });
             }
 
-            const token = fastify.jwt.sign({ id: user.id, email: user.email });
+            const token = fastify.jwt.sign({
+               id: user.id,
+               email: user.email,
+               role: user.role,
+            });
             return reply.status(200).send({ token });
          } catch (error) {
             return reply.status(500).send({ message: "Failed to login." });
+         }
+      }
+   );
+
+   fastify.post(
+      "/admin/create",
+      {
+         schema: {
+            body: CreateAdminBodySchema,
+            response: {
+               201: RegisterResponseSchema[201],
+               403: Type.Object({ message: Type.String() }),
+            },
+         },
+         onRequest: [fastify.authenticate],
+      },
+      async (request, reply) => {
+         try {
+            if (!request.authUser || !isAdmin(request.authUser)) {
+               return reply.status(403).send({ message: "Forbidden" });
+            }
+
+            const { email, password, role } = request.body as {
+               email: string;
+               password: string;
+               role: UserRole;
+            };
+
+            const user = await createUser(email, password, role);
+            return reply.status(201).send(user);
+         } catch (error) {
+            throw error;
          }
       }
    );
