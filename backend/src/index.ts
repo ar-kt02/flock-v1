@@ -1,24 +1,74 @@
+import dotenv from "dotenv";
+import path from "path";
+
+const envPath = path.resolve(
+   process.cwd(),
+   `.env.${process.env.NODE_ENV || "development"}`
+);
+dotenv.config({ path: envPath });
+
 import Fastify from "fastify";
 import { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
+import fastifyCors from "@fastify/cors";
 import userRoutes from "./modules/user/user.route";
 import jwtPlugin from "./plugins/jwt";
-import { config } from "./config/index";
+import eventRoutes from "./modules/event/event.route";
+import { errorHandler } from "./utils/error-handler";
+import validateEnv from "./utils/validateEnv";
+
+validateEnv();
 
 const fastify = Fastify({
-   logger: true,
+   logger: {
+      level: process.env.NODE_ENV === "production" ? "info" : "debug",
+      transport:
+         process.env.NODE_ENV === "production"
+            ? undefined
+            : {
+                 target: "pino-pretty",
+                 options: {
+                    ignore: "pid,hostname",
+                    colorize: true,
+                 },
+              },
+      formatters: {
+         level: (label) => ({ level: label }),
+      },
+   },
 }).withTypeProvider<TypeBoxTypeProvider>();
 
 async function main() {
-   await fastify.register(jwtPlugin, { secret: config.JWT_SECRET });
-   fastify.register(userRoutes, { prefix: "/api/users" });
+   await fastify.register(fastifyCors, {
+      origin: process.env.CORS_ORIGIN || "*",
+      methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+   });
+
+   await fastify.register(jwtPlugin);
+   await fastify.register(userRoutes, { prefix: "/api/users" });
+   await fastify.register(eventRoutes, { prefix: "/api/events" });
+
+   fastify.get("/health", async () => ({ status: "ok" }));
+
+   fastify.setErrorHandler(errorHandler);
 
    try {
-      const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
-      await fastify.listen({ port: port });
+      const port = parseInt(process.env.PORT || "3000", 10);
+      const address = await fastify.listen({
+         port,
+         host: process.env.NODE_ENV === "production" ? "0.0.0.0" : "localhost",
+      });
+
+      fastify.log.info(
+         `Server running in ${process.env.NODE_ENV || "development"} mode`
+      );
+      fastify.log.info(`Listening on ${address}`);
    } catch (err) {
-      fastify.log.error(err);
+      fastify.log.error(err, "Server failed to start");
       process.exit(1);
    }
 }
 
-main();
+main().catch((err) => {
+   console.error("Error startup:", err);
+   process.exit(1);
+});
