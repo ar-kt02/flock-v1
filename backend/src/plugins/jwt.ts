@@ -1,10 +1,8 @@
 import fp from "fastify-plugin";
 import jwt from "@fastify/jwt";
 import { FastifyInstance } from "fastify";
-import dotenv from "dotenv";
 import { PrismaClient, UserRole } from "@prisma/client";
 
-dotenv.config();
 const prisma = new PrismaClient();
 
 declare module "fastify" {
