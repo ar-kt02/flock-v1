@@ -1,0 +1,19 @@
+# OS & IDE files
+.DS_Store
+Thumbs.db
+.idea
+.vscode/
+
+# Dependencies
+node_modules/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Package manager
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
