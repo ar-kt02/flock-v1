@@ -1,216 +1,190 @@
 import {
-   setupTestEnvironment,
-   runPrismaMigrateDev,
-   registerAndLogin,
-   cleanupTestData,
-   createEventAsOrganizer,
-   TestContext,
+  setupTestEnvironment,
+  runPrismaMigrateDev,
+  registerAndLogin,
+  cleanupTestData,
+  createEventAsOrganizer,
+  TestContext,
 } from "../test-utils";
 import userRoutes from "../../src/modules/user/user.route";
 import eventRoutes from "../../src/modules/event/event.route";
 import { UserRole } from "@prisma/client";
 
 describe("Event Management - Attendee", () => {
-   let context: TestContext;
-   let attendeeToken: string;
-   let organizerToken: string;
-   let testEvent: any;
+  let context: TestContext;
+  let attendeeToken: string;
+  let organizerToken: string;
+  let testEvent: any;
 
-   beforeAll(async () => {
-      context = setupTestEnvironment();
-      runPrismaMigrateDev();
+  beforeAll(async () => {
+    context = setupTestEnvironment();
+    runPrismaMigrateDev();
 
-      await context.fastify.register(userRoutes, { prefix: "/api/users" });
-      await context.fastify.register(eventRoutes, { prefix: "/api/events" });
-      await context.fastify.ready();
-   });
+    await context.fastify.register(userRoutes, { prefix: "/api/users" });
+    await context.fastify.register(eventRoutes, { prefix: "/api/events" });
+    await context.fastify.ready();
+  });
 
-   beforeEach(async () => {
-      const attendee = await registerAndLogin(context.fastify, context.prisma);
-      const organizer = await registerAndLogin(
-         context.fastify,
-         context.prisma,
-         UserRole.ORGANIZER
-      );
+  beforeEach(async () => {
+    const attendee = await registerAndLogin(context.fastify, context.prisma);
+    const organizer = await registerAndLogin(context.fastify, context.prisma, UserRole.ORGANIZER);
 
-      attendeeToken = attendee.token;
-      organizerToken = organizer.token;
+    attendeeToken = attendee.token;
+    organizerToken = organizer.token;
 
-      testEvent = await createEventAsOrganizer(
-         context.fastify,
-         organizerToken,
-         {
-            title: "Test Event",
-            description: "Test Description",
-            imageUrl: "http://example.com/image.jpg",
-            maxAttendees: 100,
-            category: "Concert",
-         }
-      );
-   });
+    testEvent = await createEventAsOrganizer(context.fastify, organizerToken, {
+      title: "Test Event",
+      description: "Test Description",
+      imageUrl: "http://example.com/image.jpg",
+      maxAttendees: 100,
+      category: "Concert",
+    });
+  });
 
-   afterEach(async () => {
-      await cleanupTestData(context.prisma);
-   });
+  afterEach(async () => {
+    await cleanupTestData(context.prisma);
+  });
 
-   afterAll(async () => {
-      await context.prisma.$disconnect();
-      await context.fastify.close();
-   });
+  afterAll(async () => {
+    await context.prisma.$disconnect();
+    await context.fastify.close();
+  });
 
-   it("should prevent attendee from creating events", async () => {
-      const response = await context.fastify.inject({
-         method: "POST",
-         url: "/api/events",
-         headers: { authorization: `Bearer ${attendeeToken}` },
-         payload: {
-            title: "Illegal Event",
-            startTime: new Date().toISOString(),
-            endTime: new Date(Date.now() + 3600000).toISOString(),
-            location: "Test Location",
-         },
-      });
+  it("should prevent attendee from creating events", async () => {
+    const response = await context.fastify.inject({
+      method: "POST",
+      url: "/api/events",
+      headers: { authorization: `Bearer ${attendeeToken}` },
+      payload: {
+        title: "Illegal Event",
+        startTime: new Date().toISOString(),
+        endTime: new Date(Date.now() + 3600000).toISOString(),
+        location: "Test Location",
+      },
+    });
 
-      expect(response.statusCode).toBe(403);
-      expect(JSON.parse(response.payload).message).toBe(
-         "Insufficient permissions"
-      );
-   });
+    expect(response.statusCode).toBe(403);
+    expect(JSON.parse(response.payload).message).toBe("Insufficient permissions");
+  });
 
-   it("should get event details with public fields", async () => {
-      const response = await context.fastify.inject({
-         method: "GET",
-         url: `/api/events/${testEvent.id}`,
-         headers: { authorization: `Bearer ${attendeeToken}` },
-      });
+  it("should get event details with public fields", async () => {
+    const response = await context.fastify.inject({
+      method: "GET",
+      url: `/api/events/${testEvent.id}`,
+      headers: { authorization: `Bearer ${attendeeToken}` },
+    });
 
-      const event = JSON.parse(response.payload);
-      expect(response.statusCode).toBe(200);
-      expect(event.title).toBe("Test Event");
-      expect(event.description).toBe("Test Description");
-      expect(event.imageUrl).toBe("http://example.com/image.jpg");
-      expect(event.maxAttendees).toBe(100);
-      expect(event.category).toBe("Concert");
-      expect(event.attendees).toBeUndefined();
-   });
+    const event = JSON.parse(response.payload);
+    expect(response.statusCode).toBe(200);
+    expect(event.title).toBe("Test Event");
+    expect(event.description).toBe("Test Description");
+    expect(event.imageUrl).toBe("http://example.com/image.jpg");
+    expect(event.maxAttendees).toBe(100);
+    expect(event.category).toBe("Concert");
+    expect(event.attendees).toBeUndefined();
+  });
 
-   it("should prevent attendee from updating events", async () => {
-      const response = await context.fastify.inject({
-         method: "PUT",
-         url: `/api/events/${testEvent.id}`,
-         headers: { authorization: `Bearer ${attendeeToken}` },
-         payload: { title: "Updated Title" },
-      });
+  it("should prevent attendee from updating events", async () => {
+    const response = await context.fastify.inject({
+      method: "PUT",
+      url: `/api/events/${testEvent.id}`,
+      headers: { authorization: `Bearer ${attendeeToken}` },
+      payload: { title: "Updated Title" },
+    });
 
-      expect(response.statusCode).toBe(403);
-      expect(JSON.parse(response.payload).message).toBe(
-         "Unauthorized to update the event"
-      );
-   });
+    expect(response.statusCode).toBe(403);
+    expect(JSON.parse(response.payload).message).toBe("Unauthorized to update the event");
+  });
 
-   it("should allow attendee to sign up for event", async () => {
-      const response = await context.fastify.inject({
-         method: "POST",
-         url: `/api/events/${testEvent.id}/signup`,
-         headers: { authorization: `Bearer ${attendeeToken}` },
-      });
+  it("should allow attendee to sign up for event", async () => {
+    const response = await context.fastify.inject({
+      method: "POST",
+      url: `/api/events/${testEvent.id}/signup`,
+      headers: { authorization: `Bearer ${attendeeToken}` },
+    });
 
-      expect(response.statusCode).toBe(200);
-      expect(JSON.parse(response.payload).message).toBe(
-         "Successfully signed up for the event"
-      );
-   });
+    expect(response.statusCode).toBe(200);
+    expect(JSON.parse(response.payload).message).toBe("Successfully signed up for the event");
+  });
 
-   it("should prevent duplicate signups", async () => {
-      await context.fastify.inject({
-         method: "POST",
-         url: `/api/events/${testEvent.id}/signup`,
-         headers: { authorization: `Bearer ${attendeeToken}` },
-      });
+  it("should prevent duplicate signups", async () => {
+    await context.fastify.inject({
+      method: "POST",
+      url: `/api/events/${testEvent.id}/signup`,
+      headers: { authorization: `Bearer ${attendeeToken}` },
+    });
 
-      const response = await context.fastify.inject({
-         method: "POST",
-         url: `/api/events/${testEvent.id}/signup`,
-         headers: { authorization: `Bearer ${attendeeToken}` },
-      });
+    const response = await context.fastify.inject({
+      method: "POST",
+      url: `/api/events/${testEvent.id}/signup`,
+      headers: { authorization: `Bearer ${attendeeToken}` },
+    });
 
-      expect(response.statusCode).toBe(500);
-      expect(JSON.parse(response.payload).message).toBe("Already signed up");
-   });
+    expect(response.statusCode).toBe(500);
+    expect(JSON.parse(response.payload).message).toBe("Already signed up");
+  });
 
-   it("should allow attendee to unsign from event", async () => {
-      await context.fastify.inject({
-         method: "POST",
-         url: `/api/events/${testEvent.id}/signup`,
-         headers: { authorization: `Bearer ${attendeeToken}` },
-      });
+  it("should allow attendee to unsign from event", async () => {
+    await context.fastify.inject({
+      method: "POST",
+      url: `/api/events/${testEvent.id}/signup`,
+      headers: { authorization: `Bearer ${attendeeToken}` },
+    });
 
-      const response = await context.fastify.inject({
-         method: "DELETE",
-         url: `/api/events/${testEvent.id}/signup`,
-         headers: { authorization: `Bearer ${attendeeToken}` },
-      });
+    const response = await context.fastify.inject({
+      method: "DELETE",
+      url: `/api/events/${testEvent.id}/signup`,
+      headers: { authorization: `Bearer ${attendeeToken}` },
+    });
 
-      expect(response.statusCode).toBe(200);
-      expect(JSON.parse(response.payload).message).toBe(
-         "Successfully unsigned up for the event"
-      );
-   });
+    expect(response.statusCode).toBe(200);
+    expect(JSON.parse(response.payload).message).toBe("Successfully unsigned up for the event");
+  });
 
-   it("should prevent signing up when event is full", async () => {
-      const limitedEvent = await createEventAsOrganizer(
-         context.fastify,
-         organizerToken,
-         { maxAttendees: 1 }
-      );
+  it("should prevent signing up when event is full", async () => {
+    const limitedEvent = await createEventAsOrganizer(context.fastify, organizerToken, {
+      maxAttendees: 1,
+    });
 
-      await context.fastify.inject({
-         method: "POST",
-         url: `/api/events/${limitedEvent.id}/signup`,
-         headers: { authorization: `Bearer ${attendeeToken}` },
-      });
+    await context.fastify.inject({
+      method: "POST",
+      url: `/api/events/${limitedEvent.id}/signup`,
+      headers: { authorization: `Bearer ${attendeeToken}` },
+    });
 
-      const anotherAttendee = await registerAndLogin(
-         context.fastify,
-         context.prisma
-      );
-      const response = await context.fastify.inject({
-         method: "POST",
-         url: `/api/events/${limitedEvent.id}/signup`,
-         headers: { authorization: `Bearer ${anotherAttendee.token}` },
-      });
+    const anotherAttendee = await registerAndLogin(context.fastify, context.prisma);
+    const response = await context.fastify.inject({
+      method: "POST",
+      url: `/api/events/${limitedEvent.id}/signup`,
+      headers: { authorization: `Bearer ${anotherAttendee.token}` },
+    });
 
-      expect(response.statusCode).toBe(500);
-      expect(JSON.parse(response.payload).message).toBe("Event is full");
-   });
+    expect(response.statusCode).toBe(500);
+    expect(JSON.parse(response.payload).message).toBe("Event is full");
+  });
 
-   it("should prevent updating another organizer's event", async () => {
-      const anotherAttendee = await registerAndLogin(
-         context.fastify,
-         context.prisma
-      );
+  it("should prevent updating another organizer's event", async () => {
+    const anotherAttendee = await registerAndLogin(context.fastify, context.prisma);
 
-      const response = await context.fastify.inject({
-         method: "PUT",
-         url: `/api/events/${testEvent.id}`,
-         headers: { authorization: `Bearer ${anotherAttendee.token}` },
-         payload: { title: "Unauthorized Update" },
-      });
+    const response = await context.fastify.inject({
+      method: "PUT",
+      url: `/api/events/${testEvent.id}`,
+      headers: { authorization: `Bearer ${anotherAttendee.token}` },
+      payload: { title: "Unauthorized Update" },
+    });
 
-      expect(response.statusCode).toBe(403);
-      expect(JSON.parse(response.payload).message).toBe(
-         "Unauthorized to update the event"
-      );
-   });
+    expect(response.statusCode).toBe(403);
+    expect(JSON.parse(response.payload).message).toBe("Unauthorized to update the event");
+  });
 
-   it("should handle unsigning from non-signed event", async () => {
-      const response = await context.fastify.inject({
-         method: "DELETE",
-         url: `/api/events/${testEvent.id}/signup`,
-         headers: { authorization: `Bearer ${attendeeToken}` },
-      });
+  it("should handle unsigning from non-signed event", async () => {
+    const response = await context.fastify.inject({
+      method: "DELETE",
+      url: `/api/events/${testEvent.id}/signup`,
+      headers: { authorization: `Bearer ${attendeeToken}` },
+    });
 
-      expect(response.statusCode).toBe(500);
-      expect(JSON.parse(response.payload).message).toBe("Not sign up");
-   });
+    expect(response.statusCode).toBe(500);
+    expect(JSON.parse(response.payload).message).toBe("Not sign up");
+  });
 });
