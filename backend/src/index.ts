@@ -1,10 +1,7 @@
 import dotenv from "dotenv";
 import path from "path";
 
-const envPath = path.resolve(
-   process.cwd(),
-   `.env.${process.env.NODE_ENV || "development"}`
-);
+const envPath = path.resolve(process.cwd(), `.env.${process.env.NODE_ENV || "development"}`);
 dotenv.config({ path: envPath });
 
 import Fastify from "fastify";
@@ -19,56 +16,54 @@ import validateEnv from "./utils/validateEnv";
 validateEnv();
 
 const fastify = Fastify({
-   logger: {
-      level: process.env.NODE_ENV === "production" ? "info" : "debug",
-      transport:
-         process.env.NODE_ENV === "production"
-            ? undefined
-            : {
-                 target: "pino-pretty",
-                 options: {
-                    ignore: "pid,hostname",
-                    colorize: true,
-                 },
-              },
-      formatters: {
-         level: (label) => ({ level: label }),
-      },
-   },
+  logger: {
+    level: process.env.NODE_ENV === "production" ? "info" : "debug",
+    transport:
+      process.env.NODE_ENV === "production"
+        ? undefined
+        : {
+            target: "pino-pretty",
+            options: {
+              ignore: "pid,hostname",
+              colorize: true,
+            },
+          },
+    formatters: {
+      level: (label) => ({ level: label }),
+    },
+  },
 }).withTypeProvider<TypeBoxTypeProvider>();
 
 async function main() {
-   await fastify.register(fastifyCors, {
-      origin: process.env.CORS_ORIGIN || "*",
-      methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-   });
+  await fastify.register(fastifyCors, {
+    origin: process.env.CORS_ORIGIN || "*",
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+  });
 
-   await fastify.register(jwtPlugin);
-   await fastify.register(userRoutes, { prefix: "/api/users" });
-   await fastify.register(eventRoutes, { prefix: "/api/events" });
+  await fastify.register(jwtPlugin);
+  await fastify.register(userRoutes, { prefix: "/api/users" });
+  await fastify.register(eventRoutes, { prefix: "/api/events" });
 
-   fastify.get("/health", async () => ({ status: "ok" }));
+  fastify.get("/health", async () => ({ status: "ok" }));
 
-   fastify.setErrorHandler(errorHandler);
+  fastify.setErrorHandler(errorHandler);
 
-   try {
-      const port = parseInt(process.env.PORT || "3000", 10);
-      const address = await fastify.listen({
-         port,
-         host: process.env.NODE_ENV === "production" ? "0.0.0.0" : "localhost",
-      });
+  try {
+    const port = parseInt(process.env.PORT || "3000", 10);
+    const address = await fastify.listen({
+      port,
+      host: process.env.NODE_ENV === "production" ? "0.0.0.0" : "localhost",
+    });
 
-      fastify.log.info(
-         `Server running in ${process.env.NODE_ENV || "development"} mode`
-      );
-      fastify.log.info(`Listening on ${address}`);
-   } catch (err) {
-      fastify.log.error(err, "Server failed to start");
-      process.exit(1);
-   }
+    fastify.log.info(`Server running in ${process.env.NODE_ENV || "development"} mode`);
+    fastify.log.info(`Listening on ${address}`);
+  } catch (err) {
+    fastify.log.error(err, "Server failed to start");
+    process.exit(1);
+  }
 }
 
 main().catch((err) => {
-   console.error("Error startup:", err);
-   process.exit(1);
+  console.error("Error startup:", err);
+  process.exit(1);
 });

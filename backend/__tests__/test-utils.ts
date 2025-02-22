@@ -7,99 +7,117 @@ import jwtPlugin from "../src/plugins/jwt";
 
 const prisma = new PrismaClient();
 
-declare module "fastify" {
-   interface FastifyInstance {
-      authenticate: any;
-   }
-}
-
 export type TestContext = {
-   fastify: FastifyInstance;
-   prisma: PrismaClient;
+  fastify: FastifyInstance;
+  prisma: PrismaClient;
 };
 
 export const setupTestEnvironment = (): TestContext => {
-   const fastify = Fastify({
-      logger: false,
-   }).withTypeProvider<TypeBoxTypeProvider>();
-
-   fastify.register(jwtPlugin);
-
-   return {
-      fastify,
-      prisma,
-   };
+  const fastify = Fastify({
+    logger: false,
+  }).withTypeProvider<TypeBoxTypeProvider>();
+  fastify.register(jwtPlugin);
+  return {
+    fastify,
+    prisma,
+  };
 };
 
 export const runPrismaMigrateDev = () => {
-   try {
-      execSync("npx prisma migrate dev", {
-         stdio: "inherit",
-         env: { ...process.env },
-      });
-   } catch (error) {
-      process.exit(1);
-   }
+  try {
+    execSync("npx prisma migrate dev", {
+      stdio: "inherit",
+      env: { ...process.env },
+    });
+  } catch (error) {
+    process.exit(1);
+  }
+};
+
+export const createUserWithRole = async (
+  prisma: PrismaClient,
+  role: UserRole = UserRole.ATTENDEE,
+) => {
+  const email = `test+${randomUUID()}@example.com`;
+  const password = "password123456";
+
+  const user = await prisma.user.create({
+    data: {
+      email,
+      password: await import("bcrypt").then((bcrypt) => bcrypt.hash(password, 12)),
+      role,
+    },
+  });
+
+  return { email, password, userId: user.id };
 };
 
 export const registerAndLogin = async (
-   fastify: FastifyInstance,
-   prisma: PrismaClient,
-   role?: UserRole
+  fastify: FastifyInstance,
+  prisma: PrismaClient,
+  role?: UserRole,
 ) => {
-   const email = `test+${randomUUID()}@example.com`;
-   const password = "password123456";
+  let email: string;
+  let password: string;
+  let userId: string;
 
-   await fastify.inject({
+  if (role) {
+    const user = await createUserWithRole(prisma, role);
+    email = user.email;
+    password = user.password;
+    userId = user.userId;
+  } else {
+    email = `test+${randomUUID()}@example.com`;
+    password = "password123456";
+    const registerResponse = await fastify.inject({
       method: "POST",
       url: "/api/users/register",
       payload: {
-         email,
-         password,
-         ...(role ? { role } : {}),
+        email,
+        password,
       },
-   });
+    });
+    const registerData = JSON.parse(registerResponse.payload);
+    userId = registerData.id;
+  }
 
-   const loginResponse = await fastify.inject({
-      method: "POST",
-      url: "/api/users/login",
-      payload: {
-         email,
-         password,
-      },
-   });
+  const loginResponse = await fastify.inject({
+    method: "POST",
+    url: "/api/users/login",
+    payload: {
+      email,
+      password,
+    },
+  });
 
-   const { token } = JSON.parse(loginResponse.payload);
-   const user = await prisma.user.findUnique({ where: { email } });
-
-   return { token, userId: user?.id, email };
+  const { token } = JSON.parse(loginResponse.payload);
+  return { token, userId, email };
 };
 
 export const createEventAsOrganizer = async (
-   fastify: FastifyInstance,
-   organizerToken: string,
-   eventData?: Partial<Record<string, any>>
+  fastify: FastifyInstance,
+  organizerToken: string,
+  eventData?: Partial<Record<string, any>>,
 ) => {
-   const response = await fastify.inject({
-      method: "POST",
-      url: "/api/events",
-      headers: { authorization: `Bearer ${organizerToken}` },
-      payload: {
-         title: "Test Event",
-         startTime: new Date().toISOString(),
-         endTime: new Date(Date.now() + 3600000).toISOString(),
-         location: "Test Location",
-         ...eventData,
-      },
-   });
-
-   return JSON.parse(response.payload);
+  const response = await fastify.inject({
+    method: "POST",
+    url: "/api/events",
+    headers: { authorization: `Bearer ${organizerToken}` },
+    payload: {
+      title: "Test Event",
+      startTime: new Date().toISOString(),
+      endTime: new Date(Date.now() + 3600000).toISOString(),
+      location: "Test Location",
+      ...eventData,
+    },
+  });
+  return JSON.parse(response.payload);
 };
 
 export const cleanupTestData = async (prisma: PrismaClient) => {
-   await prisma.$transaction([
-      prisma.eventAttendees.deleteMany(),
-      prisma.event.deleteMany(),
-      prisma.user.deleteMany(),
-   ]);
+  await prisma.$transaction([
+    prisma.eventAttendees.deleteMany(),
+    prisma.event.deleteMany(),
+    prisma.user.deleteMany(),
+  ]);
 };
