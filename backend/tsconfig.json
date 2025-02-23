@@ -10,7 +10,7 @@
     "skipLibCheck": true,
     "moduleResolution": "node16",
     "declaration": true,
-    "outDir": "./dist",
+    "outDir": "dist",
     "rootDir": "./src",
     "sourceMap": true,
     "experimentalDecorators": true,
