@@ -11,7 +11,7 @@
     "moduleResolution": "node16",
     "declaration": true,
     "outDir": "./dist",
-    "rootDir": ".",
+    "rootDir": "./src",
     "sourceMap": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
