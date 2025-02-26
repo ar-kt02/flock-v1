@@ -187,4 +187,62 @@ describe("Event Management - Attendee", () => {
     expect(response.statusCode).toBe(500);
     expect(JSON.parse(response.payload).message).toBe("Not sign up");
   });
+
+  it("should display associated user's signed up events", async () => {
+    await context.fastify.inject({
+      method: "POST",
+      url: `/api/events/${testEvent.id}/signup`,
+      headers: { authorization: `Bearer ${attendeeToken}` },
+    });
+
+    const response = await context.fastify.inject({
+      method: "GET",
+      url: "/api/events/my-events",
+      headers: { authorization: `Bearer ${attendeeToken}` },
+    });
+
+    expect(response.statusCode).toBe(200);
+    const events = JSON.parse(response.payload);
+    expect(Array.isArray(events)).toBe(true);
+    expect(events.length).toBeGreaterThan(0);
+
+    const foundEvent = events.find((event: any) => event.id === testEvent.id);
+    expect(foundEvent.title).toBe("Test Event");
+  });
+
+  it("should return an empty array if the user has not signed up for any events", async () => {
+    const response = await context.fastify.inject({
+      method: "GET",
+      url: "/api/events/my-events",
+      headers: { authorization: `Bearer ${attendeeToken}` },
+    });
+
+    expect(response.statusCode).toBe(200);
+    const events = JSON.parse(response.payload);
+    expect(events.length).toBe(0);
+  });
+
+  it("should return 401 Unauthorized when no token is provided", async () => {
+    const response = await context.fastify.inject({
+      method: "GET",
+      url: "/api/events/my-events",
+    });
+
+    expect(response.statusCode).toBe(401);
+    const payload = JSON.parse(response.payload);
+
+    expect(payload.message).toBe("Authentication required.");
+  });
+
+  it("should return 401 Unauthorized when an invalid token is provided", async () => {
+    const response = await context.fastify.inject({
+      method: "GET",
+      url: "/api/events/my-events",
+      headers: { authorization: `Bearer invalid_token` },
+    });
+
+    expect(response.statusCode).toBe(401);
+    const payload = JSON.parse(response.payload);
+    expect(payload.message).toBe("Authentication required.");
+  });
 });
