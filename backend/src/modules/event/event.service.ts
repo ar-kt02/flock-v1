@@ -63,6 +63,31 @@ export const getAllEvents = async () => {
   }
 };
 
+export const getEventsByUserId = async (userId: string) => {
+  try {
+    const eventAttendees = await prisma.eventAttendees.findMany({
+      where: { userId },
+      include: {
+        event: {
+          include: {
+            organizer: {
+              select: {
+                id: true,
+                email: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const events = eventAttendees.map((attendee) => attendee.event);
+    return events;
+  } catch (error) {
+    throw new Error("Failed to get user's events");
+  }
+};
+
 export const updateEvent = async (
   eventId: string,
   title?: string,

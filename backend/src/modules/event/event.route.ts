@@ -8,6 +8,7 @@ import {
   deleteEvent,
   signupEvent,
   unSignEvent,
+  getEventsByUserId,
 } from "./event.service";
 
 import {
@@ -45,6 +46,40 @@ async function eventRoutes(fastify: FastifyInstance) {
         return events;
       } catch (error) {
         throw error;
+      }
+    },
+  );
+
+  fastify.get(
+    "/my-events",
+    {
+      schema: {
+        response: {
+          200: Type.Array(GetEventResponseSchema),
+          401: Type.Object({ message: Type.String() }),
+          403: Type.Object({ message: Type.String() }),
+          500: Type.Object({ message: Type.String() }),
+        },
+        security: [{ bearerAuth: [] }],
+      },
+      onRequest: [fastify.authenticate],
+    },
+    async (request, reply) => {
+      try {
+        if (!request.authUser) {
+          throw new UnauthorizedError("Authentication required");
+        }
+
+        const userId = request.authUser.id;
+        const events = await getEventsByUserId(userId);
+        return events;
+      } catch (error) {
+        if (error instanceof UnauthorizedError) {
+          reply.status(401).send({ message: error.message });
+          return;
+        }
+        reply.status(500).send({ message: "Failed to retrieve your events" });
+        return;
       }
     },
   );
