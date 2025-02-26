@@ -1,0 +1,46 @@
+[
+  {
+    "email": "admin@example.com",
+    "password": "admin123",
+    "role": "ADMIN"
+  },
+  {
+    "email": "organizer1@example.com",
+    "password": "organizer123",
+    "role": "ORGANIZER"
+  },
+  {
+    "email": "organizer2@example.com",
+    "password": "organizer123",
+    "role": "ORGANIZER"
+  },
+  {
+    "email": "organizer3@example.com",
+    "password": "organizer123",
+    "role": "ORGANIZER"
+  },
+  {
+    "email": "attendee1@example.com",
+    "password": "attendee123"
+  },
+  {
+    "email": "attendee2@example.com",
+    "password": "attendee123"
+  },
+  {
+    "email": "attendee3@example.com",
+    "password": "attendee123"
+  },
+  {
+    "email": "attendee4@example.com",
+    "password": "attendee123"
+  },
+  {
+    "email": "attendee5@example.com",
+    "password": "attendee123"
+  },
+  {
+    "email": "attendee5552@example.com",
+    "password": "attendee123"
+  }
+]
