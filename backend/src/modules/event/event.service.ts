@@ -1,9 +1,8 @@
 import { Prisma, PrismaClient } from "@prisma/client";
 import { NotFoundError, BadRequestError } from "../../utils/errors";
 
-const prisma = new PrismaClient();
-
 export const createEvent = async (
+  prisma: PrismaClient,
   title: string,
   description: string | null,
   startTime: Date,
@@ -37,7 +36,7 @@ export const createEvent = async (
   }
 };
 
-export const getEventById = async (eventId: string) => {
+export const getEventById = async (prisma: PrismaClient, eventId: string) => {
   try {
     const event = await prisma.event.findUnique({
       where: { id: eventId },
@@ -54,16 +53,19 @@ export const getEventById = async (eventId: string) => {
   }
 };
 
-export const getAllEvents = async () => {
+export const getAllEvents = async (prisma: PrismaClient, skip?: number, limit?: number) => {
   try {
-    const events = await prisma.event.findMany();
+    const events = await prisma.event.findMany({
+      skip,
+      take: limit,
+    });
     return events;
   } catch (error) {
     throw new Error("Failed to get all events");
   }
 };
 
-export const getEventsByUserId = async (userId: string) => {
+export const getEventsByUserId = async (prisma: PrismaClient, userId: string) => {
   try {
     const eventAttendees = await prisma.eventAttendees.findMany({
       where: { userId },
@@ -88,7 +90,19 @@ export const getEventsByUserId = async (userId: string) => {
   }
 };
 
+export const getEventsByOrganizerId = async (prisma: PrismaClient, organizerId: string) => {
+  try {
+    const events = await prisma.event.findMany({
+      where: { organizerId },
+    });
+    return events;
+  } catch (error) {
+    throw new Error("Failed to get events by organizer ID");
+  }
+};
+
 export const updateEvent = async (
+  prisma: PrismaClient,
   eventId: string,
   title?: string,
   description?: string | null,
@@ -100,18 +114,18 @@ export const updateEvent = async (
   category?: string | null,
 ) => {
   try {
-    await getEventById(eventId);
+    await getEventById(prisma, eventId);
 
-    const updateData: any = {};
-
-    if (title !== undefined) updateData.title = title;
-    if (description !== undefined) updateData.description = description;
-    if (startTime !== undefined) updateData.startTime = startTime;
-    if (endTime !== undefined) updateData.endTime = endTime;
-    if (location !== undefined) updateData.location = location;
-    if (imageUrl !== undefined) updateData.imageUrl = imageUrl;
-    if (maxAttendees !== undefined) updateData.maxAttendees = maxAttendees;
-    if (category !== undefined) updateData.category = category;
+    const updateData = Prisma.validator<Prisma.EventUpdateInput>()({
+      title,
+      description,
+      startTime,
+      endTime,
+      location,
+      imageUrl,
+      maxAttendees,
+      category,
+    });
 
     const updatedEvent = await prisma.event.update({
       where: { id: eventId },
@@ -129,9 +143,9 @@ export const updateEvent = async (
   }
 };
 
-export const deleteEvent = async (eventId: string) => {
+export const deleteEvent = async (prisma: PrismaClient, eventId: string) => {
   try {
-    await getEventById(eventId);
+    await getEventById(prisma, eventId);
     await prisma.event.delete({ where: { id: eventId } });
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
@@ -143,7 +157,7 @@ export const deleteEvent = async (eventId: string) => {
   }
 };
 
-export const signupEvent = async (eventId: string, userId: string) => {
+export const signupEvent = async (prisma: PrismaClient, eventId: string, userId: string) => {
   try {
     const event = await prisma.event.findUnique({
       where: { id: eventId },
@@ -175,7 +189,7 @@ export const signupEvent = async (eventId: string, userId: string) => {
   }
 };
 
-export const unSignEvent = async (eventId: string, userId: string) => {
+export const unSignEvent = async (prisma: PrismaClient, eventId: string, userId: string) => {
   try {
     const existing = await prisma.eventAttendees.findUnique({
       where: { eventId_userId: { eventId, userId } },
