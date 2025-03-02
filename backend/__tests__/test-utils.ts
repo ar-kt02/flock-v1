@@ -4,6 +4,7 @@ import { execSync } from "child_process";
 import { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 import { randomUUID } from "crypto";
 import jwtPlugin from "../src/plugins/jwt";
+import blacklistPlugin from "../src/plugins/blacklist";
 
 const prisma = new PrismaClient();
 
@@ -16,6 +17,7 @@ export const setupTestEnvironment = (): TestContext => {
   const fastify = Fastify({
     logger: false,
   }).withTypeProvider<TypeBoxTypeProvider>();
+  fastify.register(blacklistPlugin);
   fastify.register(jwtPlugin);
   return {
     fastify,
@@ -116,8 +118,30 @@ export const createEventAsOrganizer = async (
 
 export const cleanupTestData = async (prisma: PrismaClient) => {
   await prisma.$transaction([
+    prisma.blacklistedToken.deleteMany(),
     prisma.eventAttendees.deleteMany(),
     prisma.event.deleteMany(),
     prisma.user.deleteMany(),
   ]);
+};
+
+export const logoutUser = async (fastify: FastifyInstance, token: string) => {
+  return fastify.inject({
+    method: "POST",
+    url: "/api/users/logout",
+    headers: { authorization: `Bearer ${token}` },
+  });
+};
+
+export const validateToken = async (fastify: FastifyInstance, token: string) => {
+  const response = await fastify.inject({
+    method: "GET",
+    url: "/api/users/protected",
+    headers: { authorization: `Bearer ${token}` },
+  });
+  return {
+    valid: response.statusCode === 200,
+    status: response.statusCode,
+    payload: JSON.parse(response.payload),
+  };
 };
