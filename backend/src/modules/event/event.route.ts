@@ -1,5 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { Type, Static } from "@fastify/type-provider-typebox";
+import { UserRole } from "@prisma/client";
 import {
   createEvent,
   getEventById,
@@ -9,6 +10,7 @@ import {
   signupEvent,
   unSignEvent,
   getEventsByUserId,
+  getEventsByOrganizerId,
 } from "./event.service";
 
 import {
@@ -23,7 +25,6 @@ import {
   ForbiddenError,
   UnauthorizedError,
 } from "../../utils/errors";
-import { UserRole } from "@prisma/client";
 import { authorizationErrorMessage, authorizeEventModification } from "../../utils/auth";
 
 type CreateEventBody = Static<typeof CreateEventBodySchema>;
@@ -35,6 +36,10 @@ async function eventRoutes(fastify: FastifyInstance) {
     "/",
     {
       schema: {
+        querystring: Type.Object({
+          page: Type.Optional(Type.Number()),
+          limit: Type.Optional(Type.Number()),
+        }),
         response: {
           200: Type.Array(GetEventResponseSchema),
         },
@@ -42,7 +47,15 @@ async function eventRoutes(fastify: FastifyInstance) {
     },
     async (request, reply) => {
       try {
-        const events = await getAllEvents();
+        let { page = 1, limit = 10 } = request.query as { page?: number; limit?: number };
+        page = Math.max(1, page);
+        const skip = (page - 1) * limit;
+
+        const total = await fastify.prisma.event.count();
+        const events = await getAllEvents(fastify.prisma, skip, limit);
+
+        reply.header("X-Total-Count", total);
+        reply.header("Access-Control-Expose-Headers", "X-Total-Count");
         return events;
       } catch (error) {
         throw error;
@@ -51,7 +64,7 @@ async function eventRoutes(fastify: FastifyInstance) {
   );
 
   fastify.get(
-    "/my-events",
+    "/attending",
     {
       schema: {
         response: {
@@ -71,7 +84,7 @@ async function eventRoutes(fastify: FastifyInstance) {
         }
 
         const userId = request.authUser.id;
-        const events = await getEventsByUserId(userId);
+        const events = await getEventsByUserId(fastify.prisma, userId);
         return events;
       } catch (error) {
         if (error instanceof UnauthorizedError) {
@@ -100,7 +113,7 @@ async function eventRoutes(fastify: FastifyInstance) {
     async (request, reply) => {
       const { eventId } = request.params;
       try {
-        let event = await getEventById(eventId);
+        let event = await getEventById(fastify.prisma, eventId);
 
         if (!event) {
           throw new NotFoundError("Event not found");
@@ -177,6 +190,7 @@ async function eventRoutes(fastify: FastifyInstance) {
         const organizerId = request.authUser.id;
 
         const event = await createEvent(
+          fastify.prisma,
           title,
           description || null,
           new Date(startTime),
@@ -214,7 +228,7 @@ async function eventRoutes(fastify: FastifyInstance) {
     },
     async (request, reply) => {
       const { eventId } = request.params;
-      const { body } = request;
+      const body = request.body;
       const user = request.authUser;
 
       try {
@@ -236,7 +250,7 @@ async function eventRoutes(fastify: FastifyInstance) {
           }
         }
 
-        const event = await getEventById(eventId);
+        const event = await getEventById(fastify.prisma, eventId);
 
         if (!user) {
           throw new UnauthorizedError("Authentication required");
@@ -247,6 +261,7 @@ async function eventRoutes(fastify: FastifyInstance) {
         }
 
         const updatedEvent = await updateEvent(
+          fastify.prisma,
           eventId,
           body.title,
           body.description,
@@ -284,7 +299,7 @@ async function eventRoutes(fastify: FastifyInstance) {
       const user = request.authUser;
 
       try {
-        const event = await getEventById(eventId);
+        const event = await getEventById(fastify.prisma, eventId);
 
         if (!user) {
           throw new UnauthorizedError("Authentication required");
@@ -294,7 +309,7 @@ async function eventRoutes(fastify: FastifyInstance) {
           throw new ForbiddenError(authorizationErrorMessage("delete"));
         }
 
-        await deleteEvent(eventId);
+        await deleteEvent(fastify.prisma, eventId);
         reply.status(204).send();
         return;
       } catch (error) {
@@ -320,7 +335,7 @@ async function eventRoutes(fastify: FastifyInstance) {
         }
 
         const userId = request.authUser.id;
-        await signupEvent(eventId, userId);
+        await signupEvent(fastify.prisma, eventId, userId);
         reply.status(200).send({ message: "Successfully signed up for the event" });
         return;
       } catch (error) {
@@ -345,11 +360,63 @@ async function eventRoutes(fastify: FastifyInstance) {
           throw new ForbiddenError("Authentication required");
         }
         const userId = request.authUser.id;
-        await unSignEvent(eventId, userId);
+        await unSignEvent(fastify.prisma, eventId, userId);
         reply.status(200).send({ message: "Successfully unsigned up for the event" });
         return;
       } catch (error) {
         throw error;
+      }
+    },
+  );
+
+  fastify.get(
+    "/organizer",
+    {
+      schema: {
+        response: {
+          200: Type.Array(GetEventResponseSchema),
+          401: Type.Object({ message: Type.String() }),
+          403: Type.Object({ message: Type.String() }),
+          500: Type.Object({ message: Type.String() }),
+        },
+        security: [{ bearerAuth: [] }],
+      },
+      onRequest: [fastify.authenticate],
+    },
+    async (request, reply) => {
+      try {
+        if (!request.authUser) {
+          throw new UnauthorizedError("Authentication required");
+        }
+
+        if (
+          request.authUser.role !== UserRole.ORGANIZER &&
+          request.authUser.role !== UserRole.ADMIN
+        ) {
+          throw new ForbiddenError("Insufficient permissions");
+        }
+
+        const userId = request.authUser.id;
+        const { page = 1, limit = 10 } = request.query as { page?: number; limit?: number };
+        const skip = (page - 1) * limit;
+        let events;
+        if (request.authUser.role === UserRole.ADMIN) {
+          events = await getAllEvents(fastify.prisma, skip, limit);
+        } else {
+          events = await getEventsByOrganizerId(fastify.prisma, userId);
+        }
+        return events;
+      } catch (error) {
+        if (error instanceof UnauthorizedError) {
+          reply.status(401).send({ message: error.message });
+          return;
+        }
+        if (error instanceof ForbiddenError) {
+          reply.status(403).send({ message: error.message });
+          return;
+        }
+        reply.status(500).send({ message: "Failed to retrieve your events" });
+        return;
       }
     },
   );
