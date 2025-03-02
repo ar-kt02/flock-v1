@@ -197,7 +197,7 @@ describe("Event Management - Attendee", () => {
 
     const response = await context.fastify.inject({
       method: "GET",
-      url: "/api/events/my-events",
+      url: "/api/events/attending",
       headers: { authorization: `Bearer ${attendeeToken}` },
     });
 
@@ -213,7 +213,7 @@ describe("Event Management - Attendee", () => {
   it("should return an empty array if the user has not signed up for any events", async () => {
     const response = await context.fastify.inject({
       method: "GET",
-      url: "/api/events/my-events",
+      url: "/api/events/attending",
       headers: { authorization: `Bearer ${attendeeToken}` },
     });
 
@@ -225,7 +225,7 @@ describe("Event Management - Attendee", () => {
   it("should return 401 Unauthorized when no token is provided", async () => {
     const response = await context.fastify.inject({
       method: "GET",
-      url: "/api/events/my-events",
+      url: "/api/events/attending",
     });
 
     expect(response.statusCode).toBe(401);
@@ -237,7 +237,7 @@ describe("Event Management - Attendee", () => {
   it("should return 401 Unauthorized when an invalid token is provided", async () => {
     const response = await context.fastify.inject({
       method: "GET",
-      url: "/api/events/my-events",
+      url: "/api/events/attending",
       headers: { authorization: `Bearer invalid_token` },
     });
 

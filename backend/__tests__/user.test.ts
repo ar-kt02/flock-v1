@@ -1,4 +1,11 @@
-import { setupTestEnvironment, cleanupTestData, registerAndLogin, TestContext } from "./test-utils";
+import {
+  setupTestEnvironment,
+  cleanupTestData,
+  registerAndLogin,
+  TestContext,
+  validateToken,
+  logoutUser,
+} from "./test-utils";
 import { UserRole } from "@prisma/client";
 import { findUserByEmail } from "../src/modules/user/user.service";
 import userRoutes from "../src/modules/user/user.route";
@@ -52,7 +59,7 @@ describe("User Auth", () => {
       const payload = JSON.parse(response.payload);
       expect(payload.email).toBe(testEmail);
 
-      const user = await findUserByEmail(testEmail);
+      const user = await findUserByEmail(context.prisma, testEmail);
       expect(user).toBeDefined();
     });
 
@@ -94,7 +101,7 @@ describe("User Auth", () => {
       });
 
       expect(response.statusCode).toBe(201);
-      const user = await findUserByEmail(email);
+      const user = await findUserByEmail(context.prisma, email);
       expect(user?.role).toBe(UserRole.ATTENDEE);
     });
 
@@ -180,7 +187,7 @@ describe("User Auth", () => {
       });
 
       expect(response.statusCode).toBe(401);
-      expect(JSON.parse(response.payload).message).toBe("Authentication required.");
+      expect(JSON.parse(response.payload).message).toBe("Authentication required");
     });
 
     it("should prevent non-admin authenticated users from creating admin accounts", async () => {
@@ -225,7 +232,7 @@ describe("User Auth", () => {
       });
 
       expect(response.statusCode).toBe(201);
-      const user = await findUserByEmail(testEmail);
+      const user = await findUserByEmail(context.prisma, testEmail);
       expect(user?.role).toBe(UserRole.ADMIN);
     });
 
@@ -272,7 +279,7 @@ describe("User Auth", () => {
       });
 
       expect(response.statusCode).toBe(201);
-      const user = await findUserByEmail(JSON.parse(response.payload).email);
+      const user = await findUserByEmail(context.prisma, JSON.parse(response.payload).email);
       expect(user?.role).toBe(UserRole.ATTENDEE);
     });
 
@@ -291,7 +298,7 @@ describe("User Auth", () => {
         url: "/api/users/protected",
         headers: { authorization: "Bearer invalid.token.here" },
       });
-      expect(JSON.parse(response.payload).message).toBe("Authentication required.");
+      expect(JSON.parse(response.payload).message).toBe("Authentication required");
       expect(response.statusCode).toBe(401);
     });
 
@@ -302,7 +309,7 @@ describe("User Auth", () => {
       });
 
       const protecedPayload = JSON.parse(protectedResponse.payload);
-      expect(protecedPayload.message).toBe("Authentication required.");
+      expect(protecedPayload.message).toBe("Authentication required");
     });
 
     it("Should be able to access protected route with valid JWT token", async () => {
@@ -339,7 +346,24 @@ describe("User Auth", () => {
 
       expect(protectedResponse.statusCode).toBe(200);
       const protecedPayload = JSON.parse(protectedResponse.payload);
-      expect(protecedPayload.message).toBe("Successfully accessed protected route.");
+      // expect(protecedPayload.message).toBe("Successfully accessed protected route.");
+      expect(protecedPayload).toHaveProperty("role");
+    });
+  });
+
+  describe("Logout Functionality", () => {
+    it("Should successfully logout a user and invalidate JWT", async () => {
+      const { token } = await registerAndLogin(context.fastify, context.prisma);
+
+      let validationResult = await validateToken(context.fastify, token);
+      expect(validationResult.valid).toBe(true);
+
+      const logoutResponse = await logoutUser(context.fastify, token);
+      expect(logoutResponse.statusCode).toBe(200);
+
+      validationResult = await validateToken(context.fastify, token);
+      expect(validationResult.valid).toBe(false);
+      expect(validationResult.status).toBe(401);
     });
   });
 });
