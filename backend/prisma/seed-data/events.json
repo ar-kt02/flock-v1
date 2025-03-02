@@ -81,6 +81,15 @@
     "category": "Food & Drink"
   },
   {
+    "title": "Birmingham Chocolate Festival",
+    "description": "Indulge in all things chocolate at the Birmingham Chocolate Festival. Featuring chocolatiers, workshops, tastings, and chocolate-themed treats. At the Custard Factory.",
+    "startTime": "2025-10-15T11:00:00.000Z",
+    "endTime": "2025-10-17T19:00:00.000Z",
+    "location": "The Custard Factory, Birmingham",
+    "maxAttendees": 4000,
+    "category": "Food & Drink"
+  },
+  {
     "title": "Vegan Food Festival UK, London",
     "description": "The UK's largest vegan food festival in London. Featuring plant-based food stalls, vegan cooking demos, ethical fashion, and cruelty-free products. At the Olympia London.",
     "startTime": "2026-01-20T10:00:00.000Z",
@@ -88,5 +97,188 @@
     "location": "Olympia London, London",
     "maxAttendees": 8000,
     "category": "Food & Drink"
+  },
+  {
+    "title": "Leeds Indie Music Fest",
+    "description": "Celebrate emerging indie talent from across the UK. Three days of live performances, artist Q&As, and music industry workshops at Leeds First Direct Arena.",
+    "startTime": "2025-05-15T17:00:00.000Z",
+    "endTime": "2025-05-17T23:00:00.000Z",
+    "location": "First Direct Arena, Leeds",
+    "maxAttendees": 8500,
+    "category": "Music"
+  },
+  {
+    "title": "Manchester Electronic Music Weekend",
+    "description": "Experience cutting-edge electronic music across multiple venues in Manchester's Northern Quarter. Featuring DJ sets, production masterclasses, and immersive sound installations.",
+    "startTime": "2025-08-22T19:00:00.000Z",
+    "endTime": "2025-08-24T04:00:00.000Z",
+    "location": "Various venues, Northern Quarter, Manchester",
+    "maxAttendees": 5000,
+    "category": "Music"
+  },
+  {
+    "title": "Cambridge Folk Festival",
+    "description": "Annual celebration of folk traditions at Cherry Hinton Hall. Enjoy acoustic performances, instrument workshops, and family-friendly activities in a historic setting.",
+    "startTime": "2025-07-10T12:00:00.000Z",
+    "endTime": "2025-07-13T22:00:00.000Z",
+    "location": "Cherry Hinton Hall, Cambridge",
+    "maxAttendees": 4000,
+    "category": "Music"
+  },  {
+    "title": "Bristol Half Marathon",
+    "description": "Run through historic Bristol streets in this annual race. Choose from half marathon, 10K, or family fun run distances. Starting at Bristol Harbourside.",
+    "startTime": "2025-09-21T08:30:00.000Z",
+    "endTime": "2025-09-21T14:00:00.000Z",
+    "location": "Bristol Harbourside, Bristol",
+    "maxAttendees": 15000,
+    "category": "Sports"
+  },
+  {
+    "title": "Midlands Open Basketball Tournament",
+    "description": "Competitive basketball tournament for amateur teams at Birmingham's Utilita Arena. Youth and adult divisions available with coaching clinics.",
+    "startTime": "2025-11-08T09:00:00.000Z",
+    "endTime": "2025-11-09T18:00:00.000Z",
+    "location": "Utilita Arena, Birmingham",
+    "maxAttendees": 3000,
+    "category": "Sports"
+  },
+  {
+    "title": "Cornwall Surf Open",
+    "description": "Professional and amateur surfing competition at Fistral Beach. Includes beach yoga sessions, surfboard demos, and coastal conservation workshops.",
+    "startTime": "2025-06-05T07:00:00.000Z",
+    "endTime": "2025-06-08T18:00:00.000Z",
+    "location": "Fistral Beach, Newquay",
+    "maxAttendees": 8000,
+    "category": "Sports"
+  },  {
+    "title": "Glasgow Street Art Festival",
+    "description": "Transform Glasgow's Merchant City with live mural painting, graffiti workshops, and urban art tours. Collaborate with international street artists.",
+    "startTime": "2025-08-29T10:00:00.000Z",
+    "endTime": "2025-08-31T19:00:00.000Z",
+    "location": "Merchant City, Glasgow",
+    "maxAttendees": 2500,
+    "category": "Arts"
+  },
+  {
+    "title": "Liverpool Biennial of Sculpture",
+    "description": "Open-air sculpture exhibition along Liverpool's waterfront. Features installations from UK artists and interactive kinetic art displays.",
+    "startTime": "2025-10-03T09:00:00.000Z",
+    "endTime": "2025-10-31T17:00:00.000Z",
+    "location": "Royal Albert Dock, Liverpool",
+    "maxAttendees": 15000,
+    "category": "Arts"
+  },
+  {
+    "title": "York Medieval Theatre Festival",
+    "description": "Open-air performances of medieval mystery plays in York's historic streets. Features period costumes, traditional music, and artisan craft markets.",
+    "startTime": "2025-07-18T11:00:00.000Z",
+    "endTime": "2025-07-20T20:00:00.000Z",
+    "location": "York City Centre",
+    "maxAttendees": 5000,
+    "category": "Arts"
+  },  {
+    "title": "London Startup Summit",
+    "description": "Annual gathering for UK startups at Excel London. Features pitch competitions, investor meetups, and growth strategy workshops.",
+    "startTime": "2025-11-12T08:30:00.000Z",
+    "endTime": "2025-11-13T17:00:00.000Z",
+    "location": "ExCeL London",
+    "maxAttendees": 5000,
+    "category": "Business"
+  },
+  {
+    "title": "Edinburgh Sustainable Business Conference",
+    "description": "Explore green business practices and circular economy models at the EICC. Networking sessions with B Corp certified companies.",
+    "startTime": "2025-05-22T09:00:00.000Z",
+    "endTime": "2025-05-23T16:30:00.000Z",
+    "location": "EICC, Edinburgh",
+    "maxAttendees": 1200,
+    "category": "Business"
+  },
+  {
+    "title": "Leeds Digital Marketing Expo",
+    "description": "UK's largest northern marketing conference at Leeds Royal Armouries. Focus on SEO, social media trends, and content strategy.",
+    "startTime": "2025-09-04T09:30:00.000Z",
+    "endTime": "2025-09-05T17:00:00.000Z",
+    "location": "Royal Armouries, Leeds",
+    "maxAttendees": 3000,
+    "category": "Business"
+  },  {
+    "title": "Oxford Literary Festival Weekend",
+    "description": "Book lovers' event at Oxford Town Hall. Author talks, writing masterclasses, and publishing industry panels.",
+    "startTime": "2025-03-22T10:00:00.000Z",
+    "endTime": "2025-03-23T18:00:00.000Z",
+    "location": "Oxford Town Hall",
+    "maxAttendees": 2000,
+    "category": "Education"
+  },
+  {
+    "title": "Brighton Code Academy Bootcamp",
+    "description": "Weekend intensive coding workshop at Brighton Dome. Learn Python, web development, and data visualisation basics.",
+    "startTime": "2025-04-12T09:00:00.000Z",
+    "endTime": "2025-04-13T16:00:00.000Z",
+    "location": "Brighton Dome",
+    "maxAttendees": 400,
+    "category": "Education"
+  },
+  {
+    "title": "Newcastle Teachers' Innovation Conference",
+    "description": "Professional development event for educators at Northumbria University. Focus on EdTech, inclusive teaching, and curriculum design.",
+    "startTime": "2025-10-10T08:45:00.000Z",
+    "endTime": "2025-10-11T15:30:00.000Z",
+    "location": "Northumbria University, Newcastle",
+    "maxAttendees": 800,
+    "category": "Education"
+  },  {
+    "title": "Sheffield Community Green Initiative",
+    "description": "City-wide volunteering day improving green spaces. Tree planting, park cleanups, and urban gardening workshops across Sheffield.",
+    "startTime": "2025-04-05T09:00:00.000Z",
+    "endTime": "2025-04-05T15:00:00.000Z",
+    "location": "Various locations, Sheffield",
+    "maxAttendees": 2000,
+    "category": "Community"
+  },
+  {
+    "title": "Belfast Community Kitchen Festival",
+    "description": "Celebrate local food traditions with cooking demonstrations and communal meals at St George's Market. Free entry with optional donations.",
+    "startTime": "2025-08-09T11:00:00.000Z",
+    "endTime": "2025-08-10T16:00:00.000Z",
+    "location": "St George's Market, Belfast",
+    "maxAttendees": 5000,
+    "category": "Community"
+  },
+  {
+    "title": "Cardiff Neighbourhood Arts Festival",
+    "description": "Showcasing local talent through street performances, pop-up galleries, and community choir concerts in Cardiff Bay.",
+    "startTime": "2025-07-05T10:00:00.000Z",
+    "endTime": "2025-07-06T20:00:00.000Z",
+    "location": "Cardiff Bay",
+    "maxAttendees": 10000,
+    "category": "Community"
+  },  {
+    "title": "Bath Hot Air Balloon Fiesta",
+    "description": "Spectacular display of colourful hot air balloons over the Bath countryside. Night glow events and tethered rides available.",
+    "startTime": "2025-09-06T06:00:00.000Z",
+    "endTime": "2025-09-07T20:00:00.000Z",
+    "location": "Royal Victoria Park, Bath",
+    "maxAttendees": 15000,
+    "category": "Uncategorized"
+  },
+  {
+    "title": "Norwich Puzzle Championship",
+    "description": "Unique problem-solving competition featuring escape rooms, cryptic quizzes, and giant outdoor puzzles at Norwich Castle grounds.",
+    "startTime": "2025-05-03T10:00:00.000Z",
+    "endTime": "2025-05-04T18:00:00.000Z",
+    "location": "Norwich Castle",
+    "maxAttendees": 1200,
+    "category": "Uncategorized"
+  },
+  {
+    "title": "Inverness Storytelling Festival",
+    "description": "Celebration of Scottish oral traditions with ceilidh tales, mythic reenactments, and wilderness storytelling sessions by Loch Ness.",
+    "startTime": "2025-10-31T18:00:00.000Z",
+    "endTime": "2025-11-02T22:00:00.000Z",
+    "location": "Various venues, Inverness",
+    "maxAttendees": 800,
+    "category": "Uncategorized"
   }
 ]
