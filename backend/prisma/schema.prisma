@@ -8,20 +8,14 @@ generator client {
 }
 
 model User {
-  id String @id @default(uuid())
-  email String @unique
-  password String
-  role UserRole @default(ATTENDEE)
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  role      UserRole @default(ATTENDEE)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   organizedEvents Event[] @relation("Organizer")
   attendedEvents EventAttendees[]
-}
-
-enum UserRole {
-  ATTENDEE
-  ORGANIZER
-  ADMIN
 }
 
 model Event {
@@ -42,10 +36,22 @@ model Event {
 }
 
 model EventAttendees {
-    eventId String
-    event Event @relation(fields: [eventId], references: [id])
-    userId String
-    user User @relation(fields: [userId], references: [id])
+  eventId String
+  event Event @relation(fields: [eventId], references: [id])
+  userId String
+  user User @relation(fields: [userId], references: [id])
 
-    @@id([eventId, userId])
+  @@id([eventId, userId])
+}
+
+model BlacklistedToken {
+  token        String   @id @unique
+  invalidatedAt DateTime @default(now())
+  expiresAt    DateTime
+}
+
+enum UserRole {
+  ATTENDEE
+  ORGANIZER
+  ADMIN
 }
