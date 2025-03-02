@@ -12,6 +12,8 @@ import jwtPlugin from "./plugins/jwt";
 import eventRoutes from "./modules/event/event.route";
 import { errorHandler } from "./utils/error-handler";
 import validateEnv from "./utils/validateEnv";
+import blacklistPlugin from "./plugins/blacklist";
+import prismaPlugin from "./plugins/prisma";
 
 validateEnv();
 
@@ -35,12 +37,21 @@ const fastify = Fastify({
 }).withTypeProvider<TypeBoxTypeProvider>();
 
 async function main() {
+  await fastify.register(prismaPlugin);
+
   await fastify.register(fastifyCors, {
     origin: process.env.CORS_ORIGIN || "*",
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   });
 
-  await fastify.register(jwtPlugin);
+  try {
+    await fastify.register(blacklistPlugin);
+    await fastify.register(jwtPlugin);
+  } catch (err) {
+    fastify.log.error(err, "Failed to register plugins");
+    process.exit(1);
+  }
+
   await fastify.register(userRoutes, { prefix: "/api/users" });
   await fastify.register(eventRoutes, { prefix: "/api/events" });
 
