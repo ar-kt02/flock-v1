@@ -11,16 +11,18 @@
     "lint": "eslint .",
     "prisma:generate": "prisma generate",
     "prisma:migrate:dev": "dotenv -e .env.development prisma migrate dev",
+    "prisma:migrate:status:dev": "dotenv -e .env.development prisma migrate status",
     "prisma:migrate:test": "dotenv -e .env.test prisma migrate dev",
-    "prisma:migrate:prod": "prisma migrate deploy",
+    "prisma:migrate:status:test": "dotenv -e .env.test prisma migrate status",
     "prisma:studio:dev": "dotenv -e .env.development prisma studio",
     "seed:dev": "dotenv -e .env.development ts-node prisma/seed.ts",
+    "prisma:migrate:status:prod": "dotenv -e .env.production prisma migrate status",
     "seed:prod": "dotenv -e .env.production ts-node prisma/seed.ts",
-    "migrate:deploy:prod": "dotenv -e .env.production -- npx prisma migrate deploy"
+    "prisma:deploy:prod": "dotenv -e .env.production -- npx prisma migrate deploy"
   },
-    "prisma": {
-      "seed": "dotenv -e .env.production ts-node prisma/seed.ts"
-    },
+  "prisma": {
+    "seed": "dotenv -e .env.production ts-node prisma/seed.ts"
+  },
   "dependencies": {
     "@fastify/cors": "^10.0.2",
     "@fastify/jwt": "^9.0.3",
