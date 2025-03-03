@@ -2,9 +2,23 @@
 
 ## Summary
 
-This is a backend service for an event platform, built with Fastify, Prisma, and PostgreSQL. It provides APIs for user authentication, event management, and more.
+This is a backend service for an events platform, built with Fastify, Prisma, and PostgreSQL. It provides APIs for user authentication, event management, and more.
 
 ## Setup Instructions
+
+Navigate to directory:
+
+```bash
+cd frontend
+```
+
+Run the setup script in the terminal:
+
+```bash
+sh setup.sh
+```
+
+Alternatively,
 
 1.  **Install dependencies:**
 
@@ -69,8 +83,8 @@ Before running the tests, you must create a `.env.test` file with the necessary 
 
 ```
 DATABASE_URL="postgresql://postgres:password@127.0.0.1:5432/database"
- JWT_SECRET="your-custom-secret-key"
- PORT=custom-port-number (optional)
+JWT_SECRET="your-custom-secret-key"
+PORT=custom-port-number (optional)
 CORS_ORIGIN="*" # or your frontend URL (optional for testing)
 ```
 
