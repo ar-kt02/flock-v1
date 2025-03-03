@@ -2,9 +2,23 @@
 
 ## Summary
 
-This is a frontend application for an event platform, built with Next.js. It allows users to browse events, login, register, and manage their tickets.
+This is a frontend application for an events platform, built with Next.js. It allows users to browse events, login, register, and manage their tickets.
 
 ## Getting Started
+
+Navigate to directory:
+
+```bash
+cd frontend
+```
+
+Run the setup script in the terminal:
+
+```bash
+sh setup.sh
+```
+
+Alternatively,
 
 First, install the dependencies:
 
