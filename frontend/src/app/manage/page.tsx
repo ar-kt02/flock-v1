@@ -7,7 +7,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useUserRole } from "@/context/UserRoleContext";
 import { getAuthCookie } from "@/lib/auth";
-import { Search } from "lucide-react";
+import { Search, Plus } from "lucide-react";
 
 export default function ManageEventsPage() {
   const [events, setEvents] = useState<Event[]>([]);
@@ -78,6 +78,10 @@ export default function ManageEventsPage() {
     }
   }, [router, userRole, searchQuery, hasPermission, isAuthenticated]);
 
+  const handleCreateEvent = () => {
+    router.push("/manage/create");
+  };
+
   const renderLoadingState = () => {
     return Array.from({ length: 8 }).map((_, index) => (
       <EventCard key={`skeleton-${index}`} isLoading={true} />
@@ -112,7 +116,16 @@ export default function ManageEventsPage() {
     <div className="bg-purple-50 min-h-screen">
       <div className="bg-gradient-purple-normal text-white py-12">
         <div className="container mx-auto px-4">
-          <h1 className="text-4xl font-bold mb-4">Manage Events</h1>
+          <div className="flex justify-between items-center mb-8">
+            <h1 className="text-4xl font-bold">Manage Events</h1>
+            <button
+              onClick={handleCreateEvent}
+              className="bg-white text-purple-700 font-medium px-6 py-3 rounded-full shadow-md hover:bg-purple-100 focus:outline-none focus:ring-2 focus:ring-purple-300 transition-colors duration-200 flex items-center"
+            >
+              <Plus size={20} className="mr-2" />
+              Create Event
+            </button>
+          </div>
           <p className="text-xl mb-8 text-purple-100">Manage your events here</p>
           <div className="relative max-w-2xl">
             <input
@@ -146,7 +159,7 @@ export default function ManageEventsPage() {
               {!loading && events.length === 0 && (
                 <div className="col-span-full text-center py-12">
                   <p className="text-gray-500 text-lg">
-                    No events found. Try adjusting your search.
+                    No events found. Try adjusting your search or create a new event.
                   </p>
                 </div>
               )}
