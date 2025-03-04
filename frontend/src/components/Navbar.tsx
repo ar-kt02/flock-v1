@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { deleteAuthCookie, getAuthCookie } from "@/lib/auth";
+import { logoutUser } from "@/lib/api";
 import { useEffect, useState, useRef } from "react";
 import { useUserRole } from "@/context/UserRoleContext";
 import { Menu, X, User } from "lucide-react";
@@ -57,25 +58,10 @@ export default function Navbar() {
     const token = getAuthCookie();
     if (token) {
       try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://127.0.0.1:3001"}/api/users/logout`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({}),
-          },
-        );
-
-        if (response.ok) {
-          deleteAuthCookie();
-          setIsLoggedIn(false);
-          router.push("/login");
-        } else {
-          setError(response.statusText || "Failed to logout");
-        }
+        await logoutUser(token);
+        deleteAuthCookie();
+        setIsLoggedIn(false);
+        router.push("/login");
       } catch (error: unknown) {
         setError((error as Error).message || "An unexpected error occurred");
       }
@@ -139,7 +125,6 @@ export default function Navbar() {
               </Link>
             )}
 
-            {/* User Dropdown */}
             <div className="relative">
               <button
                 onClick={() => setIsDropdownOpen((prev) => !prev)}
@@ -203,10 +188,21 @@ export default function Navbar() {
 
           <button
             onClick={() => setIsMenuOpen((prev) => !prev)}
-            className="sm:hidden text-gray-800 hover:text-gray-600 focus:outline-none"
-            aria-label="Toggle navigation"
+            className="sm:hidden relative w-8 h-8 text-gray-800 hover:text-gray-600 focus:outline-none"
+            aria-label={isMenuOpen ? "Close navigation" : "Open navigation"}
           >
-            {isMenuOpen ? <X className="w-8 h-8" /> : <Menu className="w-8 h-8" />}
+            <Menu
+              className={`absolute inset-0 w-8 h-8 transition-all duration-300 transform ${
+                isMenuOpen ? "opacity-0 rotate-90" : "opacity-100 rotate-0"
+              }`}
+              aria-hidden={isMenuOpen}
+            />
+            <X
+              className={`absolute inset-0 w-8 h-8 transition-all duration-300 transform ${
+                isMenuOpen ? "opacity-100 rotate-0" : "opacity-0 rotate-90"
+              }`}
+              aria-hidden={!isMenuOpen}
+            />
           </button>
         </div>
       </div>
