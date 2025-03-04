@@ -19,7 +19,7 @@ export default function Navbar() {
 
   const pathname = usePathname();
   const router = useRouter();
-  const { userRole, setUserRole } = useUserRole();
+  const { setUserRole } = useUserRole();
 
   const checkUserRole = useCallback(async () => {
     const token = getAuthCookie();
@@ -29,7 +29,7 @@ export default function Navbar() {
         setUserRole(fetchedRole);
         setShowManageLink(fetchedRole === "ORGANIZER" || fetchedRole === "ADMIN");
         setIsLoggedIn(true);
-      } catch (error) {
+      } catch {
         setIsLoggedIn(false);
         setShowManageLink(false);
         setUserRole(null);
