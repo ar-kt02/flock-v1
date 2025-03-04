@@ -60,7 +60,7 @@ async function main() {
   fastify.setErrorHandler(errorHandler);
 
   try {
-    const port = parseInt(process.env.PORT || "3000", 10);
+    const port = parseInt(process.env.PORT || "3001", 10);
     const address = await fastify.listen({
       port,
       host: process.env.NODE_ENV === "production" ? "0.0.0.0" : "localhost",

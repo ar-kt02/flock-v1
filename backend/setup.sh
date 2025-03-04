@@ -15,8 +15,8 @@ fi
 # Prompt user for environment variables
 read -p "Enter Database URL: " DATABASE_URL
 read -p "Enter JWT Secret: " JWT_SECRET
-read -p "Enter Port Number (press enter to default 3000): " PORT
-PORT=${PORT:-3000}
+read -p "Enter Port Number (press enter to default 3001): " PORT
+PORT=${PORT:-3001}
 read -p "Enter CORS Origin (press enter to default * any): " CORS_ORIGIN
 CORS_ORIGIN=${CORS_ORIGIN:-*}
 
