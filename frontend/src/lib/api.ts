@@ -58,7 +58,7 @@ export async function logoutUser(token: string): Promise<void> {
       try {
         const errorData = await response.json();
         errorMessage = errorData.message || errorMessage;
-      } catch (e) {
+      } catch {
         errorMessage = `${errorMessage} (Status ${response.status})`;
       }
       throw new Error(errorMessage);
