@@ -42,6 +42,34 @@ export async function register(
   return data;
 }
 
+export async function logoutUser(token: string): Promise<void> {
+  try {
+    const response = await fetch(`${BACKEND_URL}/api/users/logout`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({}),
+    });
+
+    if (!response.ok) {
+      let errorMessage = "Logout failed";
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.message || errorMessage;
+      } catch (e) {
+        errorMessage = `${errorMessage} (Status ${response.status})`;
+      }
+      throw new Error(errorMessage);
+    }
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Network error: failed to reach server";
+    throw new Error(`Logout failed: ${message}`);
+  }
+}
+
 export async function getUserRole(token: string): Promise<string> {
   const response = await fetch(`${BACKEND_URL}/api/users/protected`, {
     method: "GET",
