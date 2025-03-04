@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { deleteAuthCookie, getAuthCookie } from "@/lib/auth";
-import { logoutUser } from "@/lib/api";
-import { useEffect, useState, useRef } from "react";
+import { logoutUser, getUserRole } from "@/lib/api";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useUserRole } from "@/context/UserRoleContext";
 import { Menu, X, User } from "lucide-react";
 
@@ -19,16 +19,31 @@ export default function Navbar() {
 
   const pathname = usePathname();
   const router = useRouter();
-  const { userRole } = useUserRole();
+  const { setUserRole } = useUserRole();
+
+  const checkUserRole = useCallback(async () => {
+    const token = getAuthCookie();
+    if (token) {
+      try {
+        const fetchedRole = await getUserRole(token);
+        setUserRole(fetchedRole);
+        setShowManageLink(fetchedRole === "ORGANIZER" || fetchedRole === "ADMIN");
+        setIsLoggedIn(true);
+      } catch {
+        setIsLoggedIn(false);
+        setShowManageLink(false);
+        setUserRole(null);
+      }
+    } else {
+      setIsLoggedIn(false);
+      setShowManageLink(false);
+      setUserRole(null);
+    }
+  }, [setUserRole]);
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const token = getAuthCookie();
-      setIsLoggedIn(!!token);
-      setShowManageLink(userRole === "ORGANIZER" || userRole === "ADMIN");
-    };
-    checkAuth();
-  }, [pathname, userRole]);
+    checkUserRole();
+  }, [pathname, checkUserRole]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -61,6 +76,8 @@ export default function Navbar() {
         await logoutUser(token);
         deleteAuthCookie();
         setIsLoggedIn(false);
+        setShowManageLink(false);
+        setUserRole(null);
         router.push("/login");
       } catch (error: unknown) {
         setError((error as Error).message || "An unexpected error occurred");

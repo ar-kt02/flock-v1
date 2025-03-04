@@ -5,7 +5,8 @@ import { getAuthCookie } from "@/lib/auth";
 
 interface UserRoleContextType {
   userRole: string | null;
-  setUserRole: React.Dispatch<React.SetStateAction<string | null>>;
+  setUserRole: (role: string | null) => void;
+  roleError: Error | null;
 }
 
 const UserRoleContext = createContext<UserRoleContextType | undefined>(undefined);
@@ -16,15 +17,23 @@ interface UserRoleProviderProps {
 
 export const UserRoleProvider = ({ children }: UserRoleProviderProps) => {
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [roleError, setRoleError] = useState<Error | null>(null);
 
   useEffect(() => {
     const fetchUserRole = async () => {
       const token = getAuthCookie();
       if (token) {
-        const role = await getUserRole(token);
-        setUserRole(role);
+        try {
+          const role = await getUserRole(token);
+          setUserRole(role);
+          setRoleError(null);
+        } catch (error) {
+          setRoleError(error instanceof Error ? error : new Error("Unknown error"));
+          setUserRole(null);
+        }
       } else {
         setUserRole(null);
+        setRoleError(null);
       }
     };
 
@@ -32,7 +41,7 @@ export const UserRoleProvider = ({ children }: UserRoleProviderProps) => {
   }, []);
 
   return (
-    <UserRoleContext.Provider value={{ userRole, setUserRole }}>
+    <UserRoleContext.Provider value={{ userRole, setUserRole, roleError }}>
       {children}
     </UserRoleContext.Provider>
   );
