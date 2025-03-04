@@ -39,7 +39,7 @@ Alternatively,
 
     - `DATABASE_URL`: Your PostgreSQL database connection string.
     - `JWT_SECRET`: A secret key for signing JWT tokens. **Important:** Use a strong, randomly generated key in production.
-    - `PORT`: The port the server will be running on. Defaults to 3000 if not specified.
+    - `PORT`: The port the server will be running on. Defaults to 3001 if not specified.
     - `CORS_ORIGIN`: The origin of your frontend application. Set to `*` to allow all origins (not recommended for production).
 
 3.  **Run database migrations:**
@@ -60,7 +60,7 @@ Alternatively,
     npm run dev
     ```
 
-    The server will be running on `http://localhost:3000` by default.
+    The server will be running on `http://localhost:3001` by default.
 
 ## Test Account Access
 
