@@ -1,4 +1,4 @@
-# Event Platform Frontend
+# Eventuré - an events platform enabling users to discover, book, and attend diverse experiences.&nbsp;🎟️✨
 
 ## Summary
 

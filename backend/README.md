@@ -1,4 +1,4 @@
-# Event Platform Backend
+# Eventuré - an events platform enabling users to discover, book, and attend diverse experiences.&nbsp;🎟️✨
 
 ## Summary
 
@@ -33,7 +33,7 @@ Alternatively,
     ```
     DATABASE_URL="postgresql://postgres:password@127.0.0.1:5432/database"
     JWT_SECRET="your-custom-secret-key"
-    PORT=custom-port-number
+    PORT=custom-"port-number" (optional)
     CORS_ORIGIN="*" # or your frontend URL
     ```
 
@@ -84,7 +84,7 @@ Before running the tests, you must create a `.env.test` file with the necessary 
 ```
 DATABASE_URL="postgresql://postgres:password@127.0.0.1:5432/database"
 JWT_SECRET="your-custom-secret-key"
-PORT=custom-port-number (optional)
+PORT=custom-"port-number" (optional)
 CORS_ORIGIN="*" # or your frontend URL (optional for testing)
 ```
 
