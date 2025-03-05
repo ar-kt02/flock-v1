@@ -51,7 +51,8 @@ export default function ManageEventsPage() {
 
         let eventsData: Event[];
         if (userRole === "ADMIN") {
-          eventsData = await getAllEvents();
+          const { events: fetchedEvents } = await getAllEvents(1, 100);
+          eventsData = fetchedEvents;
         } else if (userRole === "ORGANIZER") {
           eventsData = await getEventsByOrganizer(token);
         } else {
