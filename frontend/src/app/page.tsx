@@ -22,7 +22,7 @@ export default function Home() {
       setLoading(true);
       setError(null);
       try {
-        const eventsData = await getAllEvents(1, 100);
+        const { events: eventsData } = await getAllEvents(1, 100);
 
         const groupedEvents: Record<string, Event[]> = {};
         eventsData.forEach((event) => {

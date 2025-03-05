@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import EventCard from "@/components/EventCard";
 import Event from "@/types/event";
 import { Search, Filter } from "lucide-react";
+import { getAllEvents } from "@/lib/api";
 
 export default function EventsPage() {
   const [events, setEvents] = useState<Event[]>([]);
@@ -23,28 +24,12 @@ export default function EventsPage() {
       setLoading(true);
       setError(null);
       try {
-        const timestamp = new Date().getTime();
-        const response = await fetch(
-          `https://project-v1-launchpad.onrender.com/api/events?page=${currentPage}&limit=${eventsPerPage}&_t=${timestamp}`,
-        );
+        const { events: fetchedEvents, total } = await getAllEvents(currentPage, eventsPerPage);
 
-        if (!response.ok) {
-          throw new Error("Failed to fetch events");
-        }
+        setTotalPages(Math.max(1, Math.ceil(total / eventsPerPage)));
+        setTotalEvents(total);
 
-        const eventsData = await response.json();
-        const totalCountHeader = response.headers.get("X-Total-Count");
-        const totalCount = totalCountHeader ? Number(totalCountHeader) : 0;
-
-        let calculatedTotalPages = Math.max(1, Math.ceil(totalCount / eventsPerPage));
-        if (calculatedTotalPages === 0) {
-          calculatedTotalPages = 1;
-        }
-
-        setTotalPages(calculatedTotalPages);
-        setTotalEvents(totalCount);
-
-        const filtered = eventsData.filter((event: Event) => {
+        const filtered = fetchedEvents.filter((event: Event) => {
           const matchesSearch =
             event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
             event.description?.toLowerCase().includes(searchQuery.toLowerCase());

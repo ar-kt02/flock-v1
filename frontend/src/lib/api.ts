@@ -134,21 +134,30 @@ export async function getMyEvents(token: string): Promise<Event[]> {
   return data;
 }
 
-export async function getAllEvents(page: number = 1, limit: number = 10): Promise<Event[]> {
-  const response = await fetch(`${BACKEND_URL}/api/events?page=${page}&limit=${limit}`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
+export async function getAllEvents(
+  page: number = 1,
+  limit: number = 10,
+): Promise<{ events: Event[]; total: number }> {
+  const timestamp = new Date().getTime();
+  const response = await fetch(
+    `${BACKEND_URL}/api/events?page=${page}&limit=${limit}&_t=${timestamp}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
     },
-  });
+  );
 
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || "Failed to fetch events");
+    throw new Error(`Failed to fetch events: ${response.status} ${response.statusText}`);
   }
 
-  const data = await response.json();
-  return data;
+  const totalCountHeader = response.headers.get("X-Total-Count");
+  const total = totalCountHeader ? Number(totalCountHeader) : 0;
+
+  const events: Event[] = await response.json();
+  return { events, total };
 }
 
 export async function getEventById(id: string): Promise<Event> {
