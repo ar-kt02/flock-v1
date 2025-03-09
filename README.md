@@ -9,7 +9,7 @@ A responsive events platform that allows users to browse events, register, and m
 - **User Authentication:** Users can register, login, and manage their accounts.
 - **Event Browsing:** Users can browse events by category and view event details.
 - **Event Registration:** Users can register for events and manage their tickets.
-- **Admin Panel:** Administrators can create, update, and delete events.
+- **Management Panel:** Administrators & Organizers can create, update, and delete events.
 - **Role-Based Access Control:** Different user roles (attendee, organizer, admin) have different permissions.
 
 ## Live Apps
@@ -25,11 +25,17 @@ A responsive events platform that allows users to browse events, register, and m
     git clone [repository URL]
     ```
 
-2.  **Set up the backend:**
+2.  **Install dependencies: (for linting, prettier, husky)**
+
+    ```bash
+    npm install
+    ```
+
+3.  **Set up the backend:**
 
     See the `backend/README.md` file for instructions on how to set up the backend service.
 
-3.  **Set up the frontend:**
+4.  **Set up the frontend:**
 
     See the `frontend/README.md` file for instructions on how to set up the frontend application.
 
