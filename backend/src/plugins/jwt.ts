@@ -12,7 +12,15 @@ export default fp(
       throw new Error("JWT_SECRET environment variable is not set!");
     }
 
-    await fastify.register(jwt, { secret });
+    await fastify.register(jwt, {
+      secret,
+      sign: {
+        expiresIn: "7d",
+      },
+      verify: {
+        ignoreExpiration: false,
+      },
+    });
 
     fastify.decorate("authenticate", async (request: any, reply: any) => {
       try {
