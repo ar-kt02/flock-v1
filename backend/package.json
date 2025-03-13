@@ -18,8 +18,9 @@
     "migrate:test": "dotenv -e .env.test prisma migrate dev",
     "migrate:reset:test": "dotenv -e .env.test prisma migrate reset",
     "migrate:status:test": "dotenv -e .env.test prisma migrate status",
-    "prisma:migrate:prod": "dotenv -e .env.production -- npx prisma migrate deploy",
+    "migrate:prod": "dotenv -e .env.production -- npx prisma migrate deploy",
     "migrate:status:prod": "dotenv -e .env.production prisma migrate status",
+    "migrate:reset:prod": "dotenv -e .env.production prisma migrate reset",
     "seed:prod": "dotenv -e .env.production ts-node prisma/seed.ts"
   },
   "dependencies": {
