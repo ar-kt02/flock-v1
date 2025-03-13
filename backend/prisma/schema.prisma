@@ -24,6 +24,7 @@ model Event {
   description String?
   startTime DateTime
   endTime DateTime
+  isExpired Boolean @default(false)
   location String
   imageUrl String?
   maxAttendees Int?

@@ -2,8 +2,8 @@
   {
     "title": "London AI & Data Science Summit",
     "description": "The premier London summit for AI and Data Science professionals. Featuring keynotes from industry leaders, technical workshops, and networking opportunities. Held at the Barbican Centre.",
-    "startTime": "2025-03-10T09:00:00.000Z",
-    "endTime": "2025-03-12T18:00:00.000Z",
+    "startTime": "2024-03-10T09:00:00.000Z",
+    "endTime": "2024-03-12T18:00:00.000Z",
     "location": "Barbican Centre, London",
     "maxAttendees": 1200,
     "category": "Technology"
@@ -11,8 +11,8 @@
   {
     "title": "Edinburgh Fintech Forum",
     "description": "Scotland's leading Fintech forum in Edinburgh. Explore the latest trends in financial technology, blockchain, and digital banking. Hosted at the Edinburgh International Conference Centre.",
-    "startTime": "2025-04-15T09:30:00.000Z",
-    "endTime": "2025-04-16T17:30:00.000Z",
+    "startTime": "2024-04-15T09:30:00.000Z",
+    "endTime": "2024-04-16T17:30:00.000Z",
     "location": "Edinburgh International Conference Centre, Edinburgh",
     "maxAttendees": 800,
     "category": "Technology"
@@ -20,8 +20,8 @@
   {
     "title": "Bristol Cybersecurity Conference",
     "description": "Bristol's annual conference focusing on Cybersecurity threats and solutions. Featuring workshops, expert panels, and industry exhibitions. Held at the Ashton Gate Stadium.",
-    "startTime": "2025-06-12T09:00:00.000Z",
-    "endTime": "2025-06-13T16:00:00.000Z",
+    "startTime": "2024-06-12T09:00:00.000Z",
+    "endTime": "2024-06-13T16:00:00.000Z",
     "location": "Ashton Gate Stadium, Bristol",
     "maxAttendees": 600,
     "category": "Technology"
