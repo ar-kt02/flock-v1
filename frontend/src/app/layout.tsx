@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Eventuré",
+  title: "Flock! - discover your experience",
   description: "A responsive event platforms app.",
 };
 
