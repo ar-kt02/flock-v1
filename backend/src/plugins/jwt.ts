@@ -37,7 +37,7 @@ export default fp(
       try {
         await request.jwtVerify();
       } catch (err: any) {
-        throw new UnauthorizedError(err.message);
+        throw new UnauthorizedError("Invalid authentication token");
       }
 
       if (!skipUserLookup) {
