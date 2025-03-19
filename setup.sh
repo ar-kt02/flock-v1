@@ -50,7 +50,7 @@ echo "${GREEN}Created backend .env.development file.${NC}"
 # Run backend database migrations
 echo "${GREEN}Running backend database migrations...${NC}"
 cd backend
-npm run prisma:migrate:dev
+npm run migrate:dev
 if [ $? -ne 0 ]; then
   echo "${RED}Database migrations failed. Make sure to enter valid database.${NC}"
   rm .env.development
@@ -77,25 +77,22 @@ case "$response" in
         ;;
 esac
 
-# Prompt user for frontend public backend URL
 echo "${GREEN}Setting up frontend environment variables...${NC}"
-read -p "Enter .env public API URL (press enter to default localhost): " BACKEND_URL
 
-if [ -n "$BACKEND_URL" ]; then
-  echo "${GREEN}Creating frontend .env file...${NC}"
-  cd frontend
-  cat <<EOF > .env
+# Set NEXT_PUBLIC_BACKEND_URL using the backend port
+BACKEND_URL="http://localhost:$PORT"
+
+echo "${GREEN}Creating frontend .env.local file...${NC}"
+cd frontend
+cat <<EOF > .env.local
 NEXT_PUBLIC_BACKEND_URL="$BACKEND_URL"
 EOF
-  if [ $? -ne 0 ]; then
-    echo "${RED}Failed to create frontend .env file!${NC}"
-    exit 1
-  fi
-  cd ..
-  echo "${GREEN}Created frontend .env file created with public backend API.${NC}"
-else
-  echo "${GREEN}Frontend .env file creation skipped.${NC}"
+if [ $? -ne 0 ]; then
+  echo "${RED}Failed to create frontend .env.local file!${NC}"
+  exit 1
 fi
+cd ..
+echo "${GREEN}Created frontend .env.local file created with backend API.${NC}"
 
 # Start development servers
 echo "${GREEN}Starting development servers...${NC}"

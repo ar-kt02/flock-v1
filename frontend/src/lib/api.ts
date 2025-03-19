@@ -1,7 +1,7 @@
 import Event from "@/types/event";
 import { getAuthCookie } from "@/lib/auth";
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://127.0.0.1:3001";
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export async function login(email: string, password: string): Promise<string> {
   const response = await fetch(`${BACKEND_URL}/api/users/login`, {
