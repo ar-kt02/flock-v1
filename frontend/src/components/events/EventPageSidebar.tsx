@@ -1,6 +1,10 @@
-import { Calendar, Clock, MapPin } from "lucide-react";
+import { Calendar, Clock, MapPin, ChevronDown } from "lucide-react";
+import { useState, useRef } from "react";
+import useDropdownPosition from "@/hooks/useDropdownPosition";
 import Event from "@/types/event";
-import ical from "ical-generator";
+import { formatDate, formatTime, getDuration } from "@/utils/date-utils";
+import { downloadICalFile, openGoogleCalendar } from "@/utils/calendar-utils";
+import { useClickOutside } from "@/hooks/useClickOutside";
 
 interface EventPageSidebarProps {
   event?: Event;
@@ -17,69 +21,19 @@ const EventPageSidebar = ({
   onUnsign,
   isLoading = false,
 }: EventPageSidebarProps) => {
-  const formatDate = (dateString: string | undefined) => {
-    if (!dateString) return "Date not specified";
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat("en-GB", {
-      weekday: "long",
-      month: "long",
-      day: "numeric",
-      year: "numeric",
-    }).format(date);
-  };
+  const [isCalendarDropdownOpen, setIsCalendarDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const dropdownContentRef = useRef<HTMLDivElement>(null);
 
-  const formatTime = (dateString: string | undefined) => {
-    if (!dateString) return "Time not specified";
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat("en-GB", {
-      hour: "numeric",
-      minute: "numeric",
-      hour12: true,
-    }).format(date);
-  };
+  useClickOutside(dropdownRef, () => {
+    setIsCalendarDropdownOpen(false);
+  });
 
-  const getDuration = () => {
-    if (!event?.startTime || !event?.endTime) return "Duration not specified";
-    const start = new Date(event.startTime);
-    const end = new Date(event.endTime);
-    const durationMs = end.getTime() - start.getTime();
-    const durationHours = durationMs / (1000 * 60 * 60);
-
-    if (durationHours < 24) {
-      const roundedHours = Math.round(durationHours);
-      return roundedHours === 1 ? "1 hour" : `${roundedHours} hours`;
-    } else {
-      const durationDays = Math.round(durationHours / 24);
-      return durationDays === 1 ? "1 day" : `${durationDays} days`;
-    }
-  };
-
-  const addToCalendar = () => {
-    if (!event) return;
-
-    const calendar = ical({
-      name: event.title,
-      timezone: "Europe/London",
-    });
-
-    calendar.createEvent({
-      start: new Date(event.startTime),
-      end: new Date(event.endTime),
-      summary: event.title,
-      description: event.description,
-      location: event.location,
-      url: window.location.href,
-    });
-
-    const blob = new Blob([calendar.toString()], { type: "text/calendar" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", `${event?.title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}.ics`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
+  const dropdownStyle = useDropdownPosition(
+    dropdownRef,
+    dropdownContentRef,
+    isCalendarDropdownOpen,
+  );
 
   if (isLoading) {
     return (
@@ -149,7 +103,8 @@ const EventPageSidebar = ({
           <div>
             <div className="font-semibold">Time</div>
             <div className="text-gray-600">
-              {formatTime(event.startTime)} - {formatTime(event.endTime)} • {getDuration()}
+              {formatTime(event.startTime)} - {formatTime(event.endTime)} •{" "}
+              {getDuration(event.startTime, event.endTime)}
             </div>
           </div>
         </div>
@@ -175,12 +130,45 @@ const EventPageSidebar = ({
             <p className="text-green-700 text-sm mb-2">
               {`You're signed up for this experience! We can't wait to see you there.`}
             </p>
-            <button
-              onClick={addToCalendar}
-              className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md text-sm transition"
-            >
-              Add to Calendar
-            </button>
+
+            {/* Calendar dropdown */}
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={() => setIsCalendarDropdownOpen(!isCalendarDropdownOpen)}
+                className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-3 rounded-md text-sm transition flex items-center justify-center"
+              >
+                <Calendar size={16} className="mr-2" />
+                Add to Calendar
+                <ChevronDown size={16} className="ml-2" />
+              </button>
+
+              {isCalendarDropdownOpen && (
+                <div
+                  className="absolute left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg z-10"
+                  style={dropdownStyle}
+                  ref={dropdownContentRef}
+                >
+                  <button
+                    onClick={() => {
+                      downloadICalFile(event);
+                      setIsCalendarDropdownOpen(false);
+                    }}
+                    className="w-full text-left px-4 py-2 hover:bg-gray-100 text-gray-700 font-medium text-sm transition"
+                  >
+                    Import to Calendar (.ics)
+                  </button>
+                  <button
+                    onClick={() => {
+                      openGoogleCalendar(event);
+                      setIsCalendarDropdownOpen(false);
+                    }}
+                    className="w-full text-left px-4 py-2 hover:bg-gray-100 text-gray-700 font-medium text-sm transition"
+                  >
+                    Google Calendar
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       ) : (
