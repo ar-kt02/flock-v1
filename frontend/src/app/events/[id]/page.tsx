@@ -6,7 +6,7 @@ import { getEventById, signupEvent, unsignEvent, getMyEvents } from "@/lib/api";
 import { getAuthCookie } from "@/lib/auth";
 import { Calendar, Clock, MapPin } from "lucide-react";
 import Event from "@/types/event";
-import EventPageSidebar from "@/components/EventPageSidebar";
+import EventPageSidebar from "@/components/events/EventPageSidebar";
 import Image from "next/image";
 
 export default function EventPage() {
