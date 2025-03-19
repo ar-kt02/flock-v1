@@ -225,7 +225,7 @@ export default function Home() {
                   ref={(el) => {
                     scrollerRefs.current[category] = el;
                   }}
-                  className="overflow-x-auto flex space-x-6 py-4 hide-scrollbar"
+                  className="overflow-x-auto flex space-x-6 py-0 md:py-6 lg:py-6 hide-scrollbar"
                   style={{
                     scrollbarWidth: "none",
                     msOverflowStyle: "none",
@@ -233,7 +233,10 @@ export default function Home() {
                 >
                   {eventsByCategory[category]?.length > 0 ? (
                     eventsByCategory[category].map((event) => (
-                      <div key={event.id} className="flex-shrink-0" style={{ width: "280px" }}>
+                      <div
+                        key={event.id}
+                        className="flex-shrink-0 w-[220px] md:w-[280px] lg:w-[280px]"
+                      >
                         <EventCard event={event} />
                       </div>
                     ))
