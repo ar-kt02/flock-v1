@@ -2,6 +2,7 @@ import fp from "fastify-plugin";
 import jwt from "@fastify/jwt";
 import { FastifyInstance } from "fastify";
 import { isPublicRoute } from "../config/public-route";
+import { UnauthorizedError } from "../utils/errors";
 
 export default fp(
   async (fastify: FastifyInstance) => {
@@ -22,48 +23,60 @@ export default fp(
       },
     });
 
-    fastify.decorate("authenticate", async (request: any, reply: any) => {
+    const verifyAuth = async (request: any, reply: any, skipUserLookup = false) => {
+      const authHeader = request.headers.authorization;
+      if (!authHeader?.startsWith("Bearer ")) {
+        throw new UnauthorizedError("Missing authentication token");
+      }
+
+      const token = authHeader.split(" ")[1];
+      if (await fastify.isTokenBlacklisted(token)) {
+        throw new UnauthorizedError("Authentication token has been revoked");
+      }
+
       try {
         await request.jwtVerify();
-        const token = request.headers.authorization?.split(" ")[1];
+      } catch (err: any) {
+        throw new UnauthorizedError(err.message);
+      }
 
-        if (!token) throw new Error("Missing token");
-        if (await fastify.isTokenBlacklisted(token)) throw new Error("Token revoked");
-
+      if (!skipUserLookup) {
         const user = await fastify.prisma.user.findUnique({
           where: { id: request.user.id },
         });
 
-        if (!user) throw new Error("User not found");
+        if (!user) {
+          throw new UnauthorizedError("User not found");
+        }
 
         request.authUser = {
           id: user.id,
           email: user.email,
           role: user.role,
         };
+      }
+    };
+
+    fastify.decorate("authenticate", async (request: any, reply: any) => {
+      try {
+        await verifyAuth(request, reply, false);
       } catch (err: any) {
-        fastify.log.info(`Auth required for: ${request.url}`);
-        reply.status(401).send({ message: "Authentication required." });
+        reply.send(err);
       }
     });
 
     fastify.addHook("onRequest", async (request, reply) => {
       if (!request.url.startsWith("/api/")) return;
-      if (isPublicRoute(request.url, request.method)) {
-        fastify.log.info(`Skipping auth for public route: ${request.url}`);
+
+      if (isPublicRoute(request.url, request.method) || request.url === "/api/users/logout") {
+        fastify.log.info(`Skipping auth for route: ${request.url}`);
         return;
       }
-      if (request.url === "/api/users/logout") return;
 
       try {
-        await request.jwtVerify();
-        const token = request.headers.authorization?.split(" ")[1];
-        if (token && (await fastify.isTokenBlacklisted(token))) {
-          throw new Error("Token revoked");
-        }
+        await verifyAuth(request, reply, true);
       } catch (err: any) {
-        fastify.log.info(`Auth required for: ${request.url}`);
-        reply.status(401).send({ message: "Authentication required" });
+        reply.send(err);
       }
     });
 

@@ -7,6 +7,7 @@ import {
 } from "./schemas/register.schema";
 import { LoginBodySchema, LoginResponseSchema } from "./schemas/login.schema";
 import { ProtectedResponseSchema } from "./schemas/protected.schema";
+import { LogoutResponseSchema } from "./schemas/logout.schema";
 import { UserRole } from "@prisma/client";
 import { Type } from "@fastify/type-provider-typebox";
 import { isAdmin } from "../../utils/auth";
@@ -137,30 +138,21 @@ async function userRoutes(fastify: FastifyInstance) {
     },
   );
 
-  fastify.post("/logout", {}, async (request, reply) => {
-    try {
-      const authHeader = request.headers.authorization;
-      if (!authHeader || !authHeader.startsWith("Bearer ")) {
-        return reply.status(400).send({ message: "No token provided" });
-      }
-
-      const token = authHeader.split(" ")[1];
-
-      try {
-        await fastify.addTokenToBlacklist(token);
-        const isBlacklisted = await fastify.isTokenBlacklisted(token);
-
-        return reply.status(200).send({
-          message: "Successfully logged out",
-          blacklisted: isBlacklisted,
-        });
-      } catch (err: any) {
-        return reply.status(500).send({ message: "Failed to invalidate token" });
-      }
-    } catch (error: any) {
-      return reply.status(500).send({ message: "Logout failed" });
-    }
-  });
+  fastify.post(
+    "/logout",
+    {
+      schema: {
+        security: [{ bearerAuth: [] }],
+        response: LogoutResponseSchema,
+      },
+      preHandler: [fastify.authenticate],
+    },
+    async (request, reply) => {
+      const token = request.headers.authorization!.split(" ")[1];
+      await fastify.addTokenToBlacklist(token);
+      return reply.status(200).send({ message: "Successfully logged out" });
+    },
+  );
 }
 
 export default userRoutes;
