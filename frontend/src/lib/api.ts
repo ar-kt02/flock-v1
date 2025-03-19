@@ -137,17 +137,16 @@ export async function getMyEvents(token: string): Promise<Event[]> {
 export async function getAllEvents(
   page: number = 1,
   limit: number = 10,
+  isExpired: boolean = false,
 ): Promise<{ events: Event[]; total: number }> {
   const timestamp = new Date().getTime();
-  const response = await fetch(
-    `${BACKEND_URL}/api/events?page=${page}&limit=${limit}&_t=${timestamp}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
+  const url = `${BACKEND_URL}/api/events?page=${page}&limit=${limit}&_t=${timestamp}&isExpired=${isExpired}`;
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
     },
-  );
+  });
 
   if (!response.ok) {
     throw new Error(`Failed to fetch events: ${response.status} ${response.statusText}`);

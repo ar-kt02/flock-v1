@@ -11,6 +11,7 @@ interface Event {
   category: string;
   isVirtual: boolean;
   attendees?: { id: string }[];
+  createdAt: string;
 }
 
 export default Event;

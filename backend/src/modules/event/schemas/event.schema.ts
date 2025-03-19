@@ -23,6 +23,8 @@ export const GetEventResponseSchema = Type.Object({
   category: Type.Optional(Type.String()),
   organizerId: Type.String(),
   attendees: Type.Optional(Type.Array(EventAttendeesSchema)),
+  isExpired: Type.Boolean(),
+  createdAt: Type.String(),
 });
 
 export const CreateEventBodySchema = Type.Object({

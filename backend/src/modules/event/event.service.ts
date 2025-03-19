@@ -53,9 +53,19 @@ export const getEventById = async (prisma: PrismaClient, eventId: string) => {
   }
 };
 
-export const getAllEvents = async (prisma: PrismaClient, skip?: number, limit?: number) => {
+export const getAllEvents = async (
+  prisma: PrismaClient,
+  skip?: number,
+  limit?: number,
+  isExpired: boolean = false,
+) => {
   try {
+    const where: Prisma.EventWhereInput = {
+      isExpired: isExpired,
+    };
+
     const events = await prisma.event.findMany({
+      where,
       skip,
       take: limit,
     });

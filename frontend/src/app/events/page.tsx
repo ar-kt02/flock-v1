@@ -24,7 +24,11 @@ export default function EventsPage() {
       setLoading(true);
       setError(null);
       try {
-        const { events: fetchedEvents, total } = await getAllEvents(currentPage, eventsPerPage);
+        const { events: fetchedEvents, total } = await getAllEvents(
+          currentPage,
+          eventsPerPage,
+          false,
+        );
 
         setTotalPages(Math.max(1, Math.ceil(total / eventsPerPage)));
         setTotalEvents(total);
@@ -163,7 +167,7 @@ export default function EventsPage() {
             </h2>
 
             <div className="container mx-auto px-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {events.map((event) => (
                   <EventCard key={event.id} event={event} />
                 ))}

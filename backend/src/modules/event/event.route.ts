@@ -39,6 +39,7 @@ async function eventRoutes(fastify: FastifyInstance) {
         querystring: Type.Object({
           page: Type.Optional(Type.Number()),
           limit: Type.Optional(Type.Number()),
+          isExpired: Type.Optional(Type.Boolean()),
         }),
         response: {
           200: Type.Array(GetEventResponseSchema),
@@ -46,20 +47,24 @@ async function eventRoutes(fastify: FastifyInstance) {
       },
     },
     async (request, reply) => {
-      try {
-        let { page = 1, limit = 10 } = request.query as { page?: number; limit?: number };
-        page = Math.max(1, page);
-        const skip = (page - 1) * limit;
+      let {
+        page = 1,
+        limit = 10,
+        isExpired = false,
+      } = request.query as { page?: number; limit?: number; isExpired?: boolean };
+      page = Math.max(1, page);
+      const skip = (page - 1) * limit;
 
-        const total = await fastify.prisma.event.count();
-        const events = await getAllEvents(fastify.prisma, skip, limit);
+      const total = await fastify.prisma.event.count({
+        where: {
+          isExpired: isExpired,
+        },
+      });
+      const events = await getAllEvents(fastify.prisma, skip, limit, isExpired);
 
-        reply.header("X-Total-Count", total);
-        reply.header("Access-Control-Expose-Headers", "X-Total-Count");
-        return events;
-      } catch (error) {
-        throw error;
-      }
+      reply.header("X-Total-Count", total);
+      reply.header("Access-Control-Expose-Headers", "X-Total-Count");
+      return events;
     },
   );
 
