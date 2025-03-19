@@ -1,7 +1,7 @@
 "use client";
 import React, { createContext, useState, useEffect, useContext } from "react";
 import { getUserRole } from "@/lib/api";
-import { getAuthCookie } from "@/lib/auth";
+import { deleteAuthCookie, getAuthCookie } from "@/lib/auth";
 
 interface UserRoleContextType {
   userRole: string | null;
@@ -28,8 +28,10 @@ export const UserRoleProvider = ({ children }: UserRoleProviderProps) => {
           setUserRole(role);
           setRoleError(null);
         } catch (error) {
-          setRoleError(error instanceof Error ? error : new Error("Unknown error"));
+          deleteAuthCookie();
           setUserRole(null);
+          const authError = error instanceof Error ? error : new Error("Authentication required");
+          setRoleError(authError);
         }
       } else {
         setUserRole(null);
