@@ -66,8 +66,8 @@ describe("Event API - General", () => {
     expect(JSON.parse(response.payload).message).toBe("Event not found");
   });
 
-  it("should prevent public users from creating events", async () => {
-    const response = await context.fastify.inject({
+  it("should prevent users from creating, updating, deleting events without valid organizer/admin bearer token", async () => {
+    const createResponse = await context.fastify.inject({
       method: "POST",
       url: "/api/events",
       payload: {
@@ -82,26 +82,74 @@ describe("Event API - General", () => {
       },
     });
 
-    expect(response.statusCode).toBe(401);
-    expect(JSON.parse(response.payload).message.includes("Authentication required")).toBe(true);
-  });
-
-  it("should prevent public users from updating events", async () => {
-    const response = await context.fastify.inject({
+    const updateResponse = await context.fastify.inject({
       method: "PUT",
       url: `/api/events/${testEvent.id}`,
       payload: { title: "Hacked Event" },
     });
-    expect(response.statusCode).toBe(401);
-    expect(JSON.parse(response.payload).message.includes("Authentication required")).toBe(true);
-  });
 
-  it("should prevent public users from deleting events", async () => {
-    const response = await context.fastify.inject({
+    const deleteResponse = await context.fastify.inject({
       method: "DELETE",
       url: `/api/events/${testEvent.id}`,
     });
-    expect(response.statusCode).toBe(401);
-    expect(JSON.parse(response.payload).message.includes("Authentication required")).toBe(true);
+
+    const responses = [createResponse, updateResponse, deleteResponse];
+
+    responses.forEach((response) => {
+      expect(JSON.parse(response.payload).message).toBe("Missing authentication token");
+    });
+  });
+
+  it("should prevent public users from creating events", async () => {
+    const { token } = await registerAndLogin(context.fastify, context.prisma, UserRole.ATTENDEE);
+
+    const response = await context.fastify.inject({
+      method: "POST",
+      url: "/api/events",
+      headers: { authorization: `Bearer ${token}` },
+      payload: {
+        title: "New Conference",
+        description: "Annual Tech Conference",
+        startTime: new Date().toISOString(),
+        endTime: new Date(Date.now() + 3600000).toISOString(),
+        location: "Convention Center",
+        imageUrl: "http://example.com/conference.jpg",
+        maxAttendees: 1000,
+        category: "Technology",
+      },
+    });
+
+    expect(JSON.parse(response.payload).message.includes("Insufficient permissions")).toBe(true);
+  });
+
+  it("should prevent public users from updating events", async () => {
+    const { token } = await registerAndLogin(context.fastify, context.prisma, UserRole.ATTENDEE);
+
+    const response = await context.fastify.inject({
+      method: "PUT",
+      url: `/api/events/${testEvent.id}`,
+      headers: { authorization: `Bearer ${token}` },
+      payload: { title: "Hacked Event" },
+    });
+
+    expect(response.statusCode).toBe(403);
+    expect(JSON.parse(response.payload).message.includes("Unauthorized to update the event")).toBe(
+      true,
+    );
+  });
+
+  it("should prevent public users from deleting events", async () => {
+    const { token } = await registerAndLogin(context.fastify, context.prisma, UserRole.ATTENDEE);
+
+    const response = await context.fastify.inject({
+      method: "DELETE",
+      headers: { authorization: `Bearer ${token}` },
+      url: `/api/events/${testEvent.id}`,
+    });
+
+    expect(response.statusCode).toBe(403);
+    expect(JSON.parse(response.payload).message.includes("Unauthorized to delete the event")).toBe(
+      true,
+    );
   });
 });

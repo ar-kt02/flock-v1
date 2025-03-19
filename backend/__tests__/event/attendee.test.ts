@@ -231,7 +231,7 @@ describe("Event Management - Attendee", () => {
     expect(response.statusCode).toBe(401);
     const payload = JSON.parse(response.payload);
 
-    expect(payload.message).toBe("Authentication required.");
+    expect(payload.message).toBe("Missing authentication token");
   });
 
   it("should return 401 Unauthorized when an invalid token is provided", async () => {
@@ -243,6 +243,6 @@ describe("Event Management - Attendee", () => {
 
     expect(response.statusCode).toBe(401);
     const payload = JSON.parse(response.payload);
-    expect(payload.message).toBe("Authentication required.");
+    expect(payload.message).toBe("Invalid authentication token");
   });
 });

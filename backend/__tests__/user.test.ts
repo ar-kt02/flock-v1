@@ -175,7 +175,7 @@ describe("User Auth", () => {
   });
 
   describe("Admin Creation", () => {
-    it("should prevent public users from creating admin accounts", async () => {
+    it("should prevent public users (no auth bearer) from creating admin accounts", async () => {
       const response = await context.fastify.inject({
         method: "POST",
         url: "/api/users/admin/create",
@@ -187,7 +187,7 @@ describe("User Auth", () => {
       });
 
       expect(response.statusCode).toBe(401);
-      expect(JSON.parse(response.payload).message).toBe("Authentication required");
+      expect(JSON.parse(response.payload).message).toBe("Missing authentication token");
     });
 
     it("should prevent non-admin authenticated users from creating admin accounts", async () => {
@@ -298,8 +298,9 @@ describe("User Auth", () => {
         url: "/api/users/protected",
         headers: { authorization: "Bearer invalid.token.here" },
       });
-      expect(JSON.parse(response.payload).message).toBe("Authentication required");
+
       expect(response.statusCode).toBe(401);
+      expect(JSON.parse(response.payload).message).toBe("Invalid authentication token");
     });
 
     it("should return 401 when accessing protected route without valid JWT token", async () => {
@@ -308,8 +309,8 @@ describe("User Auth", () => {
         url: "/api/users/protected",
       });
 
-      const protecedPayload = JSON.parse(protectedResponse.payload);
-      expect(protecedPayload.message).toBe("Authentication required");
+      expect(protectedResponse.statusCode).toBe(401);
+      expect(JSON.parse(protectedResponse.payload).message).toBe("Missing authentication token");
     });
 
     it("Should be able to access protected route with valid JWT token", async () => {
