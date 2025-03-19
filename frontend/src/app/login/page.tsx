@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { setAuthCookie, getAuthCookie } from "@/lib/auth";
+import { setAuthCookie } from "@/lib/auth";
 import { login } from "../../lib/api";
+import { useUserRole } from "@/context/UserRoleContext";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -11,17 +12,13 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { userRole } = useUserRole();
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const token = await getAuthCookie();
-      if (token) {
-        router.push("/");
-      }
-    };
-
-    checkAuth();
-  }, [router]);
+    if (userRole) {
+      router.push("/");
+    }
+  }, [userRole, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
