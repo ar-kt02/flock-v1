@@ -109,7 +109,7 @@ export default function Navbar() {
               }`}
               aria-label="Go to Home"
             >
-              Eventuré
+              Flock!
             </Link>
             <Link
               href="/events"
