@@ -112,15 +112,24 @@ export default function EventPage() {
     );
   }
 
-  const formatDate = (dateString: string | undefined) => {
+  const formatDate = (dateString: string | undefined, removeYear: boolean = false) => {
     if (!dateString) return "Date not specified";
     const date = new Date(dateString);
-    return new Intl.DateTimeFormat("en-GB", {
+
+    const options: Intl.DateTimeFormatOptions = {
       weekday: "long",
       month: "long",
       day: "numeric",
-      year: "numeric",
-    }).format(date);
+      ...(removeYear ? {} : { year: "numeric" }),
+    };
+
+    let formattedDate = new Intl.DateTimeFormat("en-GB", options).format(date);
+
+    if (options.weekday === "long") {
+      formattedDate = formattedDate.replace(/^(.*?) /, "$1, ");
+    }
+
+    return formattedDate;
   };
 
   const formatTime = (dateString: string | undefined) => {
@@ -227,13 +236,15 @@ export default function EventPage() {
 
                   <div className="border-b pb-4 mb-3">
                     <h2 className="text-xl font-semibold mb-3">When and where</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-1 gap-3">
                       <div className="bg-gray-50 p-4 rounded-lg">
                         <div className="flex items-center mb-2">
                           <Calendar size={20} className="text-purple-600 mr-2" />
                           <span className="font-medium">Date</span>
                         </div>
-                        <p className="ml-7 text-gray-700">{formatDate(event.startTime)}</p>
+                        <p className="ml-7 text-gray-700">
+                          {formatDate(event.startTime, true)} - {formatDate(event.endTime)}
+                        </p>
                       </div>
                       <div className="bg-gray-50 p-4 rounded-lg">
                         <div className="flex items-center mb-2">
