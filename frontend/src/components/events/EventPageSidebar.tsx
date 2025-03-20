@@ -2,7 +2,7 @@ import { Calendar, Clock, MapPin, ChevronDown } from "lucide-react";
 import { useState, useRef } from "react";
 import useDropdownPosition from "@/hooks/useDropdownPosition";
 import Event from "@/types/event";
-import { formatDate, formatTime, getDuration } from "@/utils/date-utils";
+import { formatTime, getDuration, formatDate } from "@/utils/date-utils";
 import { downloadICalFile, openGoogleCalendar } from "@/utils/calendar-utils";
 import { useClickOutside } from "@/hooks/useClickOutside";
 
@@ -34,6 +34,17 @@ const EventPageSidebar = ({
     dropdownContentRef,
     isCalendarDropdownOpen,
   );
+
+  const sidebarStartDateOptions: Intl.DateTimeFormatOptions = {
+    day: "numeric",
+    month: "long",
+  };
+
+  const sidebarEndDateOptions: Intl.DateTimeFormatOptions = {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  };
 
   if (isLoading) {
     return (
@@ -94,7 +105,10 @@ const EventPageSidebar = ({
           <Calendar size={20} className="text-purple-600 mr-2" />
           <div>
             <div className="font-semibold">Date</div>
-            <div className="text-gray-600">{formatDate(event.startTime)}</div>
+            <div className="text-gray-600">
+              {formatDate(event.startTime, sidebarStartDateOptions)} -{" "}
+              {formatDate(event.endTime, sidebarEndDateOptions)}
+            </div>
           </div>
         </div>
 
@@ -131,7 +145,6 @@ const EventPageSidebar = ({
               {`You're signed up for this experience! We can't wait to see you there.`}
             </p>
 
-            {/* Calendar dropdown */}
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setIsCalendarDropdownOpen(!isCalendarDropdownOpen)}
