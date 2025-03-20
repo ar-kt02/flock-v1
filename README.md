@@ -15,7 +15,7 @@ A responsive events platform that allows users to browse events, register, and m
 ## Live Apps
 
 - [Backend](https://project-v1-launchpad.onrender.com)
-- [Frontend](https://project-v1-launchpad.vercel.app/)
+- [Frontend](https://flock-v1.vercel.app/)
 
 ## Getting Started
 
@@ -168,12 +168,19 @@ npm test
 
 ## Technologies Used
 
-- **Backend:**
-  - Fastify
-  - Prisma
-  - PostgreSQL
-  - JWT
-- **Frontend:**
-  - Next.js
-  - React
-  - Tailwind CSS
+**Language/s:**
+
+- TypeScript
+
+**Backend:**
+
+- Fastify
+- Prisma
+- PostgreSQL
+- JWT
+
+**Frontend:**
+
+- Next.js
+- React
+- Tailwind CSS
