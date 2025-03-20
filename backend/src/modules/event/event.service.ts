@@ -168,35 +168,36 @@ export const deleteEvent = async (prisma: PrismaClient, eventId: string) => {
 };
 
 export const signupEvent = async (prisma: PrismaClient, eventId: string, userId: string) => {
-  try {
-    const event = await prisma.event.findUnique({
-      where: { id: eventId },
-      include: { attendees: true },
-    });
+  const event = await prisma.event.findUnique({
+    where: { id: eventId },
+    include: { attendees: true },
+  });
 
-    if (!event) {
-      throw new NotFoundError("Event not found");
-    }
-
-    if (event?.maxAttendees && event.attendees.length >= event.maxAttendees) {
-      throw new Error("Event is full");
-    }
-
-    const existing = await prisma.eventAttendees.findUnique({
-      where: { eventId_userId: { eventId, userId } },
-    });
-    if (existing) throw new Error("Already signed up");
-
-    const eventAttendees = await prisma.eventAttendees.create({
-      data: {
-        eventId: eventId,
-        userId: userId,
-      },
-    });
-    return eventAttendees;
-  } catch (error) {
-    throw error;
+  if (!event) {
+    throw new NotFoundError("Event not found");
   }
+
+  if (event.isExpired) {
+    throw new BadRequestError("Cannot signup for an expired event");
+  }
+
+  if (event?.maxAttendees && event.attendees.length >= event.maxAttendees) {
+    throw new Error("Event is full");
+  }
+
+  const existing = await prisma.eventAttendees.findUnique({
+    where: { eventId_userId: { eventId, userId } },
+  });
+  if (existing) throw new Error("Already signed up to event");
+
+  const eventAttendees = await prisma.eventAttendees.create({
+    data: {
+      eventId: eventId,
+      userId: userId,
+    },
+  });
+
+  return eventAttendees;
 };
 
 export const unSignEvent = async (prisma: PrismaClient, eventId: string, userId: string) => {
