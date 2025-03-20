@@ -209,34 +209,6 @@ export default function EventsPage() {
           </>
         )}
       </div>
-
-      <div className="bg-purple-100 py-12">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-purple-800 mb-8 text-center">
-            Popular Categories
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {["Arts & Culture", "Food & Drink", "Outdoor Activities", "Wellness"].map(
-              (category) => (
-                <div
-                  key={category}
-                  className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
-                  onClick={() => {
-                    setActiveFilter("All");
-                    setSearchQuery(category);
-                    setCurrentPage(1);
-                  }}
-                >
-                  <div className="h-32 bg-purple-200"></div>
-                  <div className="p-4">
-                    <h3 className="font-medium text-purple-800">{category}</h3>
-                  </div>
-                </div>
-              ),
-            )}
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
