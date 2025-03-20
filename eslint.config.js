@@ -22,6 +22,7 @@ export default [
       "prettier/prettier": "error",
       "@typescript-eslint/no-unused-vars": "warn",
       "@typescript-eslint/no-explicit-any": "off",
+      // "no-useless-catch": "warn", // enable when adding features/changes
     },
   },
   prettierConfig,
