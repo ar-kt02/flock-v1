@@ -80,7 +80,11 @@ export default function EventCard({ event, isLoading = false }: EventCardProps) 
   if (!event) return null;
 
   return (
-    <div className="overflow-hidden flex flex-col h-full group relative transition-all duration-300">
+    <div
+      className={`overflow-hidden flex flex-col h-full group relative transition-all duration-300 ${
+        event.isExpired ? "opacity-50 grayscale" : ""
+      }`}
+    >
       <div className="relative h-full flex flex-col">
         <div className="relative h-80 md:h-96 lg:h-96 w-full overflow-hidden rounded-md">
           <button

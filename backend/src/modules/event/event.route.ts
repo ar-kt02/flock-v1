@@ -334,18 +334,14 @@ async function eventRoutes(fastify: FastifyInstance) {
     async (request, reply) => {
       const { eventId } = request.params;
 
-      try {
-        if (!request.authUser) {
-          throw new ForbiddenError("Authentication required");
-        }
-
-        const userId = request.authUser.id;
-        await signupEvent(fastify.prisma, eventId, userId);
-        reply.status(200).send({ message: "Successfully signed up for the event" });
-        return;
-      } catch (error) {
-        throw error;
+      if (!request.authUser) {
+        throw new ForbiddenError("Authentication required");
       }
+
+      const userId = request.authUser.id;
+      await signupEvent(fastify.prisma, eventId, userId);
+      reply.status(200).send({ message: "Successfully signed up for the event" });
+      return;
     },
   );
 
