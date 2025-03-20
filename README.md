@@ -39,12 +39,12 @@ A responsive events platform that allows users to browse events, register, and m
     - Run database migrations for the backend.
     - Optionally seed the backend database.
     - Prompt you for the frontend public API URL.
-    - Create a `.env` file in the `frontend` directory.
+    - Create a `.env.local` file in the `frontend` directory.
     - Start the development servers for both the backend and frontend.
 
-    Alternatively, you can follow the manual setup instructions below.
+Alternatively, you can follow the manual setup instructions below.
 
-### Manual Setup Instructions
+## Manual Setup Instructions
 
 #### Backend Setup
 
@@ -112,7 +112,7 @@ A responsive events platform that allows users to browse events, register, and m
 
 3.  **Set up the environment variables:**
 
-    Create a `.env` file in the `frontend` directory and add the following variable:
+    Create a `.env.local` file in the `frontend` directory and add the following variable:
 
     ```
     NEXT_PUBLIC_BACKEND_URL="http://localhost:3001" # or your backend URL
