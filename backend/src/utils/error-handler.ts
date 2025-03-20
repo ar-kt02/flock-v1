@@ -3,11 +3,12 @@ import { FastifyReply, FastifyRequest } from "fastify";
 
 export class CustomError extends Error {
   statusCode: number;
+  name: string;
 
-  constructor(message: string, statusCode: number) {
+  constructor(message: string, statusCode: number, name?: string) {
     super(message);
     this.statusCode = statusCode;
-    Object.setPrototypeOf(this, CustomError.prototype);
+    this.name = name || "Error";
   }
 }
 
@@ -22,10 +23,18 @@ export function errorHandler(error: Error, request: FastifyRequest, reply: Fasti
   }
 
   if (error instanceof Prisma.PrismaClientKnownRequestError) {
+    if (error.code === "P2002") {
+      reply.status(400).send({
+        statusCode: 400,
+        error: "UniqueConstraint",
+        message: "Invalid request",
+      });
+      return;
+    }
     reply.status(400).send({
       statusCode: 400,
-      error: "Database Error",
-      message: error.message,
+      error: "InvalidRequestError",
+      message: "Invalid request",
     });
     return;
   }
