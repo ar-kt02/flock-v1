@@ -1,12 +1,11 @@
-export const formatDate = (dateString: string | undefined): string => {
+export const formatDate = (
+  dateString: string | undefined,
+  options?: Intl.DateTimeFormatOptions,
+  locale: string = "en-GB",
+): string => {
   if (!dateString) return "Date not specified";
   const date = new Date(dateString);
-  return new Intl.DateTimeFormat("en-GB", {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  }).format(date);
+  return new Intl.DateTimeFormat(locale, options).format(date);
 };
 
 export const formatTime = (dateString: string | undefined): string => {
