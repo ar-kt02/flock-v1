@@ -12,6 +12,7 @@ interface Event {
   isVirtual: boolean;
   attendees?: { id: string }[];
   createdAt: string;
+  isExpired: boolean;
 }
 
 export default Event;
