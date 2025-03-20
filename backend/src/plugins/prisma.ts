@@ -9,5 +9,6 @@ export default fp(async (fastify) => {
 
   fastify.addHook("onClose", async (instance) => {
     await instance.prisma.$disconnect();
+    fastify.log.info("Prisma client disconnected");
   });
 });
