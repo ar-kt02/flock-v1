@@ -121,7 +121,7 @@ describe("Event Management - Attendee", () => {
     });
 
     expect(response.statusCode).toBe(500);
-    expect(JSON.parse(response.payload).message).toBe("Already signed up");
+    expect(JSON.parse(response.payload).message).toBe("Already signed up to event");
   });
 
   it("should allow attendee to unsign from event", async () => {
