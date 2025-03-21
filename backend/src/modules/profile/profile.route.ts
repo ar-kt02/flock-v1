@@ -5,6 +5,31 @@ import { ForbiddenError } from "../../utils/errors";
 
 async function profileRoutes(fastify: FastifyInstance) {
   fastify.get(
+    "/",
+    {
+      schema: {
+        security: [{ bearerAuth: [] }],
+        tags: ["profile"],
+        response: getProfileResponseSchema,
+      },
+      preHandler: [fastify.authenticate],
+    },
+    async (request, reply) => {
+      const profile = await getProfileByUserId(fastify.prisma, request.authUser.id);
+
+      return reply.status(200).send({
+        userId: profile.userId,
+        email: profile.email,
+        firstName: profile.firstName,
+        surname: profile.surname,
+        phoneNumber: profile.phoneNumber,
+        location: profile.location,
+        interests: profile.interests,
+      });
+    },
+  );
+
+  fastify.get(
     "/:userId",
     {
       schema: {
