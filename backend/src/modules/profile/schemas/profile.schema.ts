@@ -10,7 +10,7 @@ export const getProfileResponseSchema = {
       userId: Type.String({ description: "The User ID of the profile" }),
       email: Type.String({ description: "The email of the user" }),
       firstName: Type.Optional(Type.String({ description: "The first name of the profile" })),
-      surame: Type.Optional(Type.String({ description: "The surname of the profile" })),
+      surname: Type.Optional(Type.String({ description: "The surname of the profile" })),
       phoneNumber: Type.Optional(Type.String({ description: "The phone number of the profile" })),
       location: Type.Optional(Type.String({ description: "The location of the profile" })),
       interests: Type.Array(Type.String(), { description: "The interests of the profile" }),
