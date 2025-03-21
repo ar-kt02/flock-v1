@@ -1,5 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { comparePassword, createUser, findUserByEmail } from "./user.service";
+import { createProfile } from "../profile/profile.service";
 import {
   RegisterBodySchema,
   RegisterResponseSchema,
@@ -33,6 +34,8 @@ async function userRoutes(fastify: FastifyInstance) {
         }
 
         const user = await createUser(fastify.prisma, email, password, UserRole.ATTENDEE);
+
+        await createProfile(fastify.prisma, user.id, { email });
 
         return reply.status(201).send({
           id: user.id,
