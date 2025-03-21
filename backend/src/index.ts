@@ -9,11 +9,12 @@ import jwtPlugin from "./plugins/jwt";
 import blacklistPlugin from "./plugins/blacklist";
 import prismaPlugin from "./plugins/prisma";
 import schedulerPlugin from "./jobs/scheduler";
-import { errorHandler } from "./utils/error-handler";
+import { errorHandler } from "./middleware/error-handler";
 import { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 import validateEnv from "./utils/validateEnv";
 import fastifySwaggerUi from "@fastify/swagger-ui";
 import fastifySwagger from "@fastify/swagger";
+import profileRoutes from "./modules/profile/profile.route";
 
 const envPath = path.resolve(process.cwd(), `.env.${process.env.NODE_ENV || "development"}`);
 dotenv.config({ path: envPath });
@@ -94,6 +95,7 @@ async function main() {
 
     await fastify.register(userRoutes, { prefix: "/api/users" });
     await fastify.register(eventRoutes, { prefix: "/api/events" });
+    await fastify.register(profileRoutes, { prefix: "/api/profile" });
 
     fastify.setErrorHandler(errorHandler);
     fastify.get("/health", async () => ({
