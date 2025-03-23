@@ -136,7 +136,8 @@ const EventPageSidebar = ({
         <div>
           <button
             onClick={onUnsign}
-            className="w-full py-3 px-4 border border-red-500 text-red-500 hover:bg-red-50 rounded-lg font-medium transition"
+            disabled={event?.isExpired}
+            className={`w-full py-3 px-4 border border-red-500 text-red-500 hover:bg-red-50 rounded-lg font-medium transition ${event?.isExpired ? "opacity-50 cursor-not-allowed" : ""}`}
           >
             Cancel Reservation
           </button>
@@ -148,7 +149,8 @@ const EventPageSidebar = ({
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setIsCalendarDropdownOpen(!isCalendarDropdownOpen)}
-                className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-3 rounded-md text-sm transition flex items-center justify-center"
+                disabled={event?.isExpired}
+                className={`w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-3 rounded-md text-sm transition flex items-center justify-center ${event?.isExpired ? "opacity-50 cursor-not-allowed" : ""}`}
               >
                 <Calendar size={16} className="mr-2" />
                 Add to Calendar
@@ -166,7 +168,8 @@ const EventPageSidebar = ({
                       downloadICalFile(event);
                       setIsCalendarDropdownOpen(false);
                     }}
-                    className="w-full text-left px-4 py-2 hover:bg-gray-100 text-gray-700 font-medium text-sm transition"
+                    disabled={event?.isExpired}
+                    className={`w-full text-left px-4 py-2 hover:bg-gray-100 text-gray-700 font-medium text-sm transition ${event?.isExpired ? "opacity-50 cursor-not-allowed" : ""}`}
                   >
                     Import to Calendar (.ics)
                   </button>
@@ -175,7 +178,8 @@ const EventPageSidebar = ({
                       openGoogleCalendar(event);
                       setIsCalendarDropdownOpen(false);
                     }}
-                    className="w-full text-left px-4 py-2 hover:bg-gray-100 text-gray-700 font-medium text-sm transition"
+                    disabled={event?.isExpired}
+                    className={`w-full text-left px-4 py-2 hover:bg-gray-100 text-gray-700 font-medium text-sm transition ${event?.isExpired ? "opacity-50 cursor-not-allowed" : ""}`}
                   >
                     Google Calendar
                   </button>
@@ -187,10 +191,15 @@ const EventPageSidebar = ({
       ) : (
         <button
           onClick={onSignup}
-          className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-4 rounded-lg transition"
+          disabled={event?.isExpired}
+          className={`w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-4 rounded-lg transition ${event?.isExpired ? "opacity-50 cursor-not-allowed" : ""}`}
         >
           Reserve a spot
         </button>
+      )}
+
+      {event?.isExpired && (
+        <div className="text-gray-500 mt-2 text-sm text-center">This event has already ended.</div>
       )}
     </div>
   );
