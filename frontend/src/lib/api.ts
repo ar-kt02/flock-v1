@@ -1,5 +1,6 @@
 import Event from "@/types/event";
 import { getAuthCookie } from "@/lib/auth";
+import Profile from "@/types/profile";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -40,6 +41,45 @@ export async function register(
 
   const data = await response.json();
   return data;
+}
+
+export async function getProfile(): Promise<Profile> {
+  const token = getAuthCookie();
+
+  const response = await fetch(`${BACKEND_URL}/api/profile`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || "Failed to fetch profile");
+  }
+
+  return await response.json();
+}
+
+export async function updateProfile(profileData: Partial<Profile>): Promise<Profile> {
+  const token = getAuthCookie();
+
+  const response = await fetch(`${BACKEND_URL}/api/profile`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(profileData),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || "Failed to update profile");
+  }
+
+  return await response.json();
 }
 
 export async function logoutUser(token: string): Promise<void> {
