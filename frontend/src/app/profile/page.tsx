@@ -167,7 +167,9 @@ export default function ProfilePage() {
             </div>
             <div>
               <h2 className="text-2xl font-bold text-gray-800">
-                {profile?.firstName || ""} {profile?.surname || "Name not set"}
+                {profile?.firstName || profile?.surname
+                  ? `${profile?.firstName || ""} ${profile?.surname || ""}`
+                  : "Name not set"}
               </h2>
               <p className="text-gray-600">{profile?.email || "Email not set"}</p>
             </div>
