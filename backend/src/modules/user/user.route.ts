@@ -12,6 +12,7 @@ import { LogoutResponseSchema } from "./schemas/logout.schema";
 import { UserRole } from "@prisma/client";
 import { Type } from "@fastify/type-provider-typebox";
 import { isAdmin } from "../../utils/auth";
+import { validateCredentials, validateLogin } from "../../utils/validators";
 
 async function userRoutes(fastify: FastifyInstance) {
   fastify.post(
@@ -21,29 +22,26 @@ async function userRoutes(fastify: FastifyInstance) {
         body: RegisterBodySchema,
         response: RegisterResponseSchema,
       },
+      preValidation: validateCredentials,
     },
     async (request, reply) => {
       const { email, password } = request.body as {
         email: string;
         password: string;
       };
-      try {
-        const existingUser = await findUserByEmail(fastify.prisma, email);
-        if (existingUser) {
-          return reply.status(400).send({ message: "Email is already taken." });
-        }
 
-        const user = await createUser(fastify.prisma, email, password, UserRole.ATTENDEE);
-
-        await createProfile(fastify.prisma, user.id, { email });
-
-        return reply.status(201).send({
-          id: user.id,
-          email: user.email,
-        });
-      } catch (error) {
-        return reply.status(500).send({ message: "Failed to register account." });
+      const existingUser = await findUserByEmail(fastify.prisma, email);
+      if (existingUser) {
+        return reply.status(400).send({ message: "Email is already taken." });
       }
+
+      const user = await createUser(fastify.prisma, email, password, UserRole.ATTENDEE);
+      await createProfile(fastify.prisma, user.id, { email });
+
+      return reply.status(201).send({
+        id: user.id,
+        email: user.email,
+      });
     },
   );
 
@@ -54,6 +52,7 @@ async function userRoutes(fastify: FastifyInstance) {
         body: LoginBodySchema,
         response: LoginResponseSchema,
       },
+      preValidation: validateLogin,
     },
     async (request, reply) => {
       const { email, password } = request.body as {
