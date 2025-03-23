@@ -1,6 +1,11 @@
 import { FastifyInstance } from "fastify";
-import { GetProfileParamsSchema, getProfileResponseSchema } from "./schemas/profile.schema";
-import { getProfileByUserId } from "./profile.service";
+import {
+  GetProfileParamsSchema,
+  getProfileResponseSchema,
+  updateProfileBodySchema,
+  updateProfileResponseSchema,
+} from "./schemas/profile.schema";
+import { getProfileByUserId, updateProfile } from "./profile.service";
 import { ForbiddenError } from "../../utils/errors";
 
 async function profileRoutes(fastify: FastifyInstance) {
@@ -57,6 +62,43 @@ async function profileRoutes(fastify: FastifyInstance) {
         phoneNumber: profile.phoneNumber,
         location: profile.location,
         interests: profile.interests,
+      });
+    },
+  );
+
+  fastify.put(
+    "/",
+    {
+      schema: {
+        security: [{ bearerAuth: [] }],
+        tags: ["profile"],
+        body: updateProfileBodySchema,
+        response: updateProfileResponseSchema,
+      },
+      preHandler: [fastify.authenticate],
+    },
+    async (request, reply) => {
+      const updateData = request.body as {
+        email?: string;
+        firstName?: string;
+        surname?: string;
+        phoneNumber?: string;
+        location?: string;
+        interests?: string[];
+      };
+
+      const currentProfile = await getProfileByUserId(fastify.prisma, request.authUser.id);
+
+      const updatedProfile = await updateProfile(fastify.prisma, currentProfile.userId, updateData);
+
+      return reply.status(200).send({
+        userId: updatedProfile.userId,
+        email: updatedProfile.email,
+        firstName: updatedProfile.firstName,
+        surname: updatedProfile.surname,
+        phoneNumber: updatedProfile.phoneNumber,
+        location: updatedProfile.location,
+        interests: updatedProfile.interests,
       });
     },
   );
