@@ -47,3 +47,49 @@ export const createProfile = async (
 
   return profile;
 };
+
+export const updateProfile = async (
+  prisma: PrismaClient,
+  userId: string,
+  updateData: {
+    email?: string;
+    firstName?: string;
+    surname?: string;
+    phoneNumber?: string;
+    location?: string;
+    interests?: string[];
+  },
+) => {
+  await getProfileByUserId(prisma, userId);
+
+  if (updateData.email) {
+    const existingUser = await prisma.user.findUnique({
+      where: { email: updateData.email },
+    });
+
+    if (existingUser && existingUser.id !== userId) {
+      throw new BadRequestError("Email is already taken by another user");
+    }
+
+    return await prisma.$transaction(async (tx) => {
+      await tx.user.update({
+        where: { id: userId },
+        data: { email: updateData.email },
+      });
+
+      const updatedProfile = await tx.profile.update({
+        where: { userId: userId },
+        data: updateData,
+      });
+
+      return updatedProfile;
+    });
+  } else {
+    const updatedProfile = await prisma.profile.update({
+      where: { userId: userId },
+      data: updateData,
+    });
+
+    return updatedProfile;
+  }
+};
