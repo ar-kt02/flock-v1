@@ -30,6 +30,14 @@ async function main() {
         role: userData.role as "ADMIN" | "ORGANIZER" | "ATTENDEE",
       },
     });
+
+    await prisma.profile.create({
+      data: {
+        userId: user.id,
+        email: user.email,
+      },
+    });
+
     if (userData.role === "ADMIN") {
       adminUser = user;
     } else if (userData.role === "ORGANIZER") {
