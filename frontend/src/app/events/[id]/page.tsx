@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { getEventById, signupEvent, unsignEvent, getMyEvents } from "@/lib/api";
 import { getAuthCookie } from "@/lib/auth";
-import { Calendar, Clock, MapPin } from "lucide-react";
+import { Calendar, Clock, MapPin, X } from "lucide-react";
 import Event from "@/types/event";
 import EventPageSidebar from "@/components/events/EventPageSidebar";
 import Image from "next/image";
@@ -104,14 +104,6 @@ export default function EventPage() {
     }
   };
 
-  if (error) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-red-500 text-xl">Error: {error}</div>
-      </div>
-    );
-  }
-
   const formatDate = (dateString: string | undefined, removeYear: boolean = false) => {
     if (!dateString) return "Date not specified";
     const date = new Date(dateString);
@@ -156,6 +148,19 @@ export default function EventPage() {
             className="w-full h-full object-cover"
             priority={true}
           />
+        )}
+        {error && (
+          <div className="fixed inset-x-0 bottom-6 z-50 flex justify-center">
+            <div className="bg-red-100 text-red-700 p-4 rounded-lg shadow-lg relative">
+              <button
+                onClick={() => setError(null)}
+                className="absolute top-2 right-2 text-red-700 hover:text-red-900 focus:outline-none"
+              >
+                <X size={24} className="mr-1" />
+              </button>
+              <p className="pr-8">{error}</p>
+            </div>
+          </div>
         )}
       </div>
 
