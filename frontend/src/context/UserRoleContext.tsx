@@ -1,6 +1,6 @@
 "use client";
 import React, { createContext, useState, useEffect, useContext } from "react";
-import { getUserRole } from "@/lib/api";
+import { getUserRole, ApiError } from "@/lib/api";
 import { deleteAuthCookie, getAuthCookie } from "@/lib/auth";
 
 interface UserRoleContextType {
@@ -28,7 +28,9 @@ export const UserRoleProvider = ({ children }: UserRoleProviderProps) => {
           setUserRole(role);
           setRoleError(null);
         } catch (error) {
-          deleteAuthCookie();
+          if (error instanceof ApiError && error.status === 401) {
+            deleteAuthCookie();
+          }
           setUserRole(null);
           const authError = error instanceof Error ? error : new Error("Authentication required");
           setRoleError(authError);
