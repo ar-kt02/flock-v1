@@ -2,6 +2,16 @@ import Event from "@/types/event";
 import { getAuthCookie } from "@/lib/auth";
 import Profile from "@/types/profile";
 
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    public status: number,
+  ) {
+    super(message);
+    this.name = "ApiError";
+  }
+}
+
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export async function login(email: string, password: string): Promise<string> {
@@ -121,7 +131,7 @@ export async function getUserRole(token: string): Promise<string> {
 
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.message);
+    throw new ApiError(error.message, response.status);
   }
 
   const data = await response.json();
