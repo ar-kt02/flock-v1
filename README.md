@@ -38,7 +38,6 @@ A responsive events platform that allows users to browse events, register, and m
     - Create a `.env.development` file in the `backend` directory.
     - Run database migrations for the backend.
     - Optionally seed the backend database.
-    - Prompt you for the frontend public API URL.
     - Create a `.env.local` file in the `frontend` directory.
     - Start the development servers for both the backend and frontend.
 
@@ -67,7 +66,7 @@ Alternatively, you can follow the manual setup instructions below.
     ```
     DATABASE_URL="postgresql://postgres:password@127.0.0.1:5432/database"
     JWT_SECRET="your-custom-secret-key"
-    PORT=custom-"port-number" (optional)
+    PORT="custom-port-number" (optional)
     CORS_ORIGIN="*" # or your frontend URL
     ```
 
@@ -79,7 +78,7 @@ Alternatively, you can follow the manual setup instructions below.
 4.  **Run database migrations:**
 
     ```bash
-    npm run prisma:migrate:dev
+    npm run migrate:dev
     ```
 
 5.  **Seed the database (optional):**
