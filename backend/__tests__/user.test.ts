@@ -115,10 +115,8 @@ describe("User Auth", () => {
         },
       });
 
-      expect(response.statusCode).toBe(400);
-      expect(JSON.parse(response.payload).message).toMatch(
-        "body/password must NOT have fewer than 8 characters",
-      );
+      expect(response.statusCode).toBe(422);
+      expect(JSON.parse(response.payload).message).toContain("at least 8 characters");
     });
   });
 
