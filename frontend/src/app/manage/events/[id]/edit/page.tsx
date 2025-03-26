@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { getEventById, updateEvent } from "@/lib/api";
+import { getEventById, updateEvent, deleteEvent } from "@/lib/api";
 import { getAuthCookie } from "@/lib/auth";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { useUserRole } from "@/context/UserRoleContext";
+import { Trash2 } from "lucide-react";
 
 export default function EditEventPage() {
   const [title, setTitle] = useState("");
@@ -19,10 +20,12 @@ export default function EditEventPage() {
   const [category, setCategory] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [minDate, setMinDate] = useState("");
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const router = useRouter();
   const { id } = useParams();
   const { userRole } = useUserRole();
@@ -38,6 +41,69 @@ export default function EditEventPage() {
     maxAttendees: "",
     category: "",
   });
+
+  const handleDelete = async () => {
+    setIsLoading(true);
+    setError("");
+    setSuccess(false);
+
+    try {
+      const token = await getAuthCookie();
+      if (!token) {
+        router.push("/login");
+        return;
+      }
+
+      await deleteEvent(id as string, token);
+      setSuccess(true);
+      setSuccessMessage("Event successfully deleted! Redirecting...");
+      setIsDeleteModalOpen(false);
+      
+      setTimeout(() => {
+        router.push("/manage");
+      }, 2000);
+    }  catch (error: unknown) {
+      if (error instanceof Error) {
+        setError("Failed to delete event");
+      } else {
+        setError("An unexpected error occurred");
+      }
+      setIsDeleteModalOpen(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const DeleteConfirmationModal = () => (
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+        <div className="p-6">
+          <div className="flex items-center mb-4 text-red-600">
+            <h2 className="text-2xl font-bold">Delete Event</h2>
+          </div>
+          <p className="text-gray-600 mb-6">
+            Are you sure you want to delete the event &quot;{title}&quot;? 
+            This action cannot be undone.
+          </p>
+          <div className="flex justify-end space-x-4">
+            <button 
+              onClick={() => setIsDeleteModalOpen(false)}
+              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
+            >
+              Cancel
+            </button>
+            <button 
+              onClick={handleDelete}
+              disabled={isLoading}
+              className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors disabled:opacity-50"
+            >
+              {isLoading ? "Deleting..." : "Delete"}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
   useEffect(() => {
     if (userRole !== null) {
@@ -175,6 +241,7 @@ export default function EditEventPage() {
       );
 
       setSuccess(true);
+      setSuccessMessage("Event updated successfully!");
 
       setOriginalValues({
         title,
@@ -231,7 +298,18 @@ export default function EditEventPage() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-purple-50 to-purple-100 p-4">
-      <div className="bg-white shadow-lg rounded-lg px-6 py-8 w-full max-w-2xl mx-auto">
+      {isDeleteModalOpen && <DeleteConfirmationModal />}
+      
+      <div className="bg-white shadow-lg rounded-lg px-6 py-8 w-full max-w-2xl mx-auto relative">
+        <button 
+          type="button"
+          onClick={() => setIsDeleteModalOpen(true)}
+          className="absolute top-4 right-4 text-red-500 hover:text-red-700 transition-colors"
+          title="Delete Event"
+        >
+          <Trash2 className="w-6 h-6" />
+        </button>
+
         <h1 className="text-3xl font-bold text-center text-purple-800 mb-6">Edit Event</h1>
 
         {error && (
@@ -241,16 +319,8 @@ export default function EditEventPage() {
         )}
 
         {success && (
-          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-md">
-            <div className="flex flex-col sm:flex-row items-center justify-between">
-              <p className="text-green-700 mb-3 sm:mb-0">Changes applied successfully!</p>
-              <Link
-                href={`/events/${id}`}
-                className="inline-block bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-6 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-              >
-                View Event
-              </Link>
-            </div>
+          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-md flex items-center justify-center">
+            <p className="text-green-700 text-center">{successMessage}</p>
           </div>
         )}
 

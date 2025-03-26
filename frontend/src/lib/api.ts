@@ -53,6 +53,20 @@ export async function register(
   return data;
 }
 
+export async function deleteEvent(eventId: string, token: string): Promise<void> {
+  const response = await fetch(`${BACKEND_URL}/api/events/${eventId}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || "Failed to delete event");
+  }
+}
+
 export async function getProfile(): Promise<Profile> {
   const token = getAuthCookie();
 
