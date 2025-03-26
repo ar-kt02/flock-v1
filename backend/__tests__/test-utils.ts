@@ -70,7 +70,7 @@ export const registerAndLogin = async (
     userId = user.userId;
   } else {
     email = `test+${randomUUID()}@example.com`;
-    password = "password123456";
+    password = "Password123456!";
     const registerResponse = await fastify.inject({
       method: "POST",
       url: "/api/users/register",
