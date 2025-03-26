@@ -5,101 +5,90 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m' # No Colour
 
-# Install backend dependencies
-echo "${GREEN}Installing backend dependencies...${NC}"
-cd backend
-npm install
-if [ $? -ne 0 ]; then
-  echo "${RED}Failed to install backend packages.${NC}"
-  exit 1
-fi
-cd ..
+# Error handling function
+handle_error() {
+    echo "${RED}Error: $1${NC}"
+    exit 1
+}
 
-# Install frontend dependencies
-echo "${GREEN}Installing frontend dependencies...${NC}"
-cd frontend
-npm install
-if [ $? -ne 0 ]; then
-  echo "${RED}Failed to install frontend packages.${NC}"
-  exit 1
-fi
-cd ..
+green_text() {
+    echo "${GREEN}$1${NC}"
+}
 
-# Prompt user for backend environment variables
-echo "${GREEN}Setting up backend environment variables...${NC}"
-read -p "Enter Database URL: " DATABASE_URL
-read -p "Enter JWT Secret: " JWT_SECRET
-read -p "Enter Port Number (press enter to default 3001): " PORT
-PORT=${PORT:-3001}
-read -p "Enter CORS Origin (press enter to default * any): " CORS_ORIGIN
-CORS_ORIGIN=${CORS_ORIGIN:-*}
+# Install backend & frontend dependencies
+install_dependencies() {
+    for dir in backend frontend; do
+        green_text "Installing $dir dependencies..."
+        cd "$dir" || handle_error "Cannot navigate to $dir directory"
+        npm install || handle_error "Failed to install $dir packages"
+        cd ..
+    done
+}
 
-echo "${GREEN}Creating backend .env.development file...${NC}"
-cat <<EOF > backend/.env.development
+# Configure environment variables
+configure_env() {
+    green_text "Setting up environment variables..."
+    read -p "Enter Database URL (required):" DATABASE_URL
+    read -p "Enter JWT Secret (required):" JWT_SECRET
+    read -p "Enter Port Number (press enter to default 3001): " PORT
+    PORT=${PORT:-3001}
+    read -p "Enter CORS Origin (press enter to default * any): " CORS_ORIGIN
+    CORS_ORIGIN=${CORS_ORIGIN:-*}
+
+    # Backend .env.development
+    green_text "Creating backend .env.development file with environment variables..."
+    cat > backend/.env.development << EOF || handle_error "Failed to create backend .env.development file"
 DATABASE_URL="$DATABASE_URL"
 JWT_SECRET="$JWT_SECRET"
 PORT="$PORT"
 CORS_ORIGIN="$CORS_ORIGIN"
 EOF
-if [ $? -ne 0 ]; then
-  echo "${RED}Failed to create backend .env.development!${NC}"
-  exit 1
-fi
-echo "${GREEN}Created backend .env.development file.${NC}"
 
-# Run backend database migrations
-echo "${GREEN}Running backend database migrations...${NC}"
-cd backend
-npm run migrate:dev
-if [ $? -ne 0 ]; then
-  echo "${RED}Database migrations failed. Make sure to enter valid database.${NC}"
-  rm .env.development
-  echo "${RED}Removed backend .env.development file.${NC}"
-  exit 1
-fi
-cd ..
-echo "${GREEN}Backend database migrations complete.${NC}"
-
-# Seed the backend database (optional)
-read -r -p "Seed the backend database? (y/n) " response
-case "$response" in
-    [yY][eE][sS]|[yY])
-        cd backend
-        npm run seed:dev
-        if [ $? -ne 0 ]; then
-          echo "${RED}Database seeding failed!${NC}"
-          exit 1
-        fi
-        cd ..
-        ;;
-    *)
-        echo "${GREEN}Skipping backend database seeding.${NC}"
-        ;;
-esac
-
-echo "${GREEN}Setting up frontend environment variables...${NC}"
-
-# Set NEXT_PUBLIC_BACKEND_URL using the backend port
-BACKEND_URL="http://localhost:$PORT"
-
-echo "${GREEN}Creating frontend .env.local file...${NC}"
-cd frontend
-cat <<EOF > .env.local
-NEXT_PUBLIC_BACKEND_URL="$BACKEND_URL"
+    # Frontend .env.local
+    green_text "Creating frontend .env.local file with environment variables..."
+    cat > frontend/.env.local << EOF || handle_error "Failed to create frontend .env.local file"
+NEXT_PUBLIC_BACKEND_URL="http://localhost:$PORT"
 EOF
-if [ $? -ne 0 ]; then
-  echo "${RED}Failed to create frontend .env.local file!${NC}"
-  exit 1
-fi
-cd ..
-echo "${GREEN}Created frontend .env.local file created with backend API.${NC}"
+}
+
+# Run migrations, and seed (optional)
+setup_database() {
+    green_text "Running database prisma migrations..."
+    cd backend
+    npm run migrate:dev || handle_error "Database migrations failed. Make sure to enter valid database."
+    green_text "Database prisma migrations complete..."
+    
+    read -n 1 -p "Seed database? (y/n): " seed_choice
+    echo
+    
+    if [[ "$seed_choice" =~ ^[Yy]$ ]]; then
+        green_text "Seeding database..."
+        npm run seed:dev || handle_error "Database seeding failed"
+    else
+        green_text "Skipped database seeding."
+    fi
+    cd ..
+}
 
 # Start development servers
-echo "${GREEN}Starting development servers...${NC}"
-echo "${GREEN}Starting backend development server...${NC}"
-cd backend
-npm run dev &
+start_servers() {
+    green_text "Starting development servers"
+    
+    green_text "Starting backend development server"
+    cd backend
+    npm run dev & 
+    
+    green_text "Starting frontend development server"
+    cd ../frontend
+    npm run dev 
+}
 
-echo "${GREEN}Starting frontend development server...${NC}"
-cd ../frontend
-npm run dev
+# Main execution
+main() {
+    install_dependencies
+    configure_env
+    setup_database
+    start_servers
+}
+
+main
