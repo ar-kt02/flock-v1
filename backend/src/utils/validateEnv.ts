@@ -6,15 +6,20 @@ function validateEnv() {
     PORT: Joi.number().default(3000),
     JWT_SECRET: Joi.string().required(),
     DATABASE_URL: Joi.string().required(),
-  }).unknown();
-
-  const { error } = schema.validate(process.env, {
-    abortEarly: false,
-    allowUnknown: true,
   });
 
+  const options = {
+    abortEarly: false,
+    allowUnknown: true,
+    stripUnknown: true,
+  };
+
+  const { error } = schema.validate(process.env, options);
+
   if (error) {
-    console.error(`Environment variable error: ${error.message}`);
+    if (process.env.NODE_ENV !== "production") {
+      throw new Error(`Environment variable error: ${error.message}`);
+    }
     process.exit(1);
   }
 }
